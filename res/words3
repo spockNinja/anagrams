@@ -1,0 +1,9 @@
+This will eventually contain an alphabetically sorted word list of all the 3 letter words.
+For comparison sake, there will be two columns. Each word has a sorted counterpart.
+
+	EX:
+		all	all
+		gum	gmu
+		say	asy
+
+There will also be files words4, words5, etc.
