@@ -1,3 +1,7 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
 
 struct player {
 	int points;
