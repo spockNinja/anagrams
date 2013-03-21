@@ -25,7 +25,7 @@ typedef struct{
 } Player;
 
 typedef struct {
-	struct player* players;		
+	Player* players;		
 	int num_players;			// to compare with the server maximum
 	char* base_word;			// the root word
 	char* base_word_sorted;		// base_word with letters in alphabetic order
