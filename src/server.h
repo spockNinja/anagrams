@@ -22,7 +22,7 @@ typedef struct{
 	int portnumber;	// do we need this? #MAYBE
 	bool connected;	// whether or not the client is currently connected
 	bool ready;		// whether or not the client is ready for a round
-}Player ;
+} Player;
 
 typedef struct {
 	struct player* players;		
@@ -30,4 +30,4 @@ typedef struct {
 	char* base_word;			// the root word
 	char* base_word_sorted;		// base_word with letters in alphabetic order
 	char* base_word_factors;	// the list of words able to be made from base_word, in alphabetic order
-}Server_Info ;
+} Server_Info;
