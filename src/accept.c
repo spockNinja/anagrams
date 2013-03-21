@@ -1,4 +1,4 @@
-#include <server.h>
+#include "server.h"
 
 /**
 * checks if the given word is valid for this round
