@@ -2,14 +2,10 @@
 // pick a starting word (7, 8, 9 chars long?)
 // and use that word to make all possible words
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <string.h>
 
-int MIN_SIZE = 3;
-int MAX_SIZE = 8;
-int MAX_WORDS = 40000;
+#include "server.h"
+#include "builder.h"
+
 
 // A helper function used by qsort that sorts each word
 // see qsort documentation if you're curious
@@ -49,27 +45,4 @@ void read_list(FILE* word_file, char orig_list[MAX_WORDS][MAX_SIZE], char sort_l
 
 void generate_game_words(char* base_word, char orig_list[MAX_WORDS][MAX_SIZE], char sort_list[MAX_WORDS][MAX_SIZE]) {
 
-}
-
-// Usually runs with no args, but can take an optional word list location
-// * Not needed when we get to compiling the server - the server will just call read_list
-//      after setting up the same things*
-int main (int argc, char* argv[]) {
-    char* SRC_LIST = "/460/words";
-    char ORIG_LIST[MAX_WORDS][MAX_SIZE];
-    char SORT_LIST[MAX_WORDS][MAX_SIZE];
-
-    if (argc == 2) {
-        SRC_LIST = argv[1];
-    }
-
-    // Open the file for reading
-    FILE* word_file = fopen(SRC_LIST, "r");
-
-    if (word_file == NULL) {
-        perror(SRC_LIST);
-        exit(EXIT_FAILURE);
-    }
-
-    read_list(word_file, ORIG_LIST, SORT_LIST);
 }
