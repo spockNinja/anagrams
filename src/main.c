@@ -6,10 +6,14 @@
 // * Not needed when we get to compiling the server - the server will just call read_list
 //      after setting up the same things*
 int main (int argc, char* argv[]) {
-    char* SRC_LIST = "/460/words";
+    
+	Server_Info server_info;
+	fd_set current_users;
+	
+	char* SRC_LIST = "../res/words";
     char ORIG_LIST[MAX_WORDS][MAX_SIZE];
     char SORT_LIST[MAX_WORDS][MAX_SIZE];
-
+	
     if (argc == 2) {
         SRC_LIST = argv[1];
     }
@@ -23,4 +27,7 @@ int main (int argc, char* argv[]) {
     }
 
     read_list(word_file, ORIG_LIST, SORT_LIST);
+	
+	FD_ZERO(&current_users);
+	start_server(&server_info, &current_users);
 }

@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 
 #define ext_port "9876"  //external port we listen on
 #define max_users 10 	 //max number of users playing the game.
