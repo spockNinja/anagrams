@@ -11,7 +11,7 @@
 #include <arpa/inet.h>
 
 #define ext_port "9876"  //external port we listen on
-#define max_users 10
+#define max_users 10 	 //max number of users playing the game.
 
 typedef struct{
 	int points;		// current tally of the player's points
@@ -23,7 +23,7 @@ typedef struct{
 } Player;
 
 typedef struct {
-	Player* players;		
+	Player players[max_users];	// an array of all current players in the game
 	int num_players;			// to compare with the server maximum
 	char* base_word;			// the root word
 	char* base_word_sorted;		// base_word with letters in alphabetic order
