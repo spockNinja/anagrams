@@ -1,7 +1,5 @@
-// This program will take the words found in /460/words
-// pick a starting word (7, 8, 9 chars long?)
-// and use that word to make all possible words
-
+// This file has all the methods to handle puzzle generation
+// including reading the word list, picking a base word, and generating puzzle words
 
 #include "server.h"
 #include "builder.h"
@@ -19,13 +17,13 @@ int sort_word(const void* word1, const void* word2) {
 
 // Reads every word in a file (each word on a line)
 // and stores the normal list in orig_list while storing a parallel list of sorted words in sort_list
-void read_list(FILE* word_file, char orig_list[MAX_WORDS][MAX_SIZE], char sort_list[MAX_WORDS][MAX_SIZE]) {
+void read_list(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE], char sort_list[MAX_WORDS][MAX_SIZE]) {
 
     char current_word[30];
     int list_loc = 0;
 
-    while(!feof(word_file)) {
-        fgets(current_word, 30, word_file);
+    while(!feof(server->word_list)) {
+        fgets(current_word, 30, server->word_list);
         int word_size = strlen(current_word);
 
         // strip out newlines
@@ -34,7 +32,7 @@ void read_list(FILE* word_file, char orig_list[MAX_WORDS][MAX_SIZE], char sort_l
             word_size = word_size-1;
         }
         // only include the word if it is the right size
-        if (word_size >= MIN_SIZE && word_size <= MAX_SIZE) {
+        if (word_size >= MIN_SIZE && word_size < MAX_SIZE) {
             strcpy(orig_list[list_loc], current_word);
             qsort(current_word, word_size, 1, sort_word);
             strcpy(sort_list[list_loc], current_word);
@@ -43,6 +41,61 @@ void read_list(FILE* word_file, char orig_list[MAX_WORDS][MAX_SIZE], char sort_l
     }
 }
 
-void generate_game_words(char* base_word, char orig_list[MAX_WORDS][MAX_SIZE], char sort_list[MAX_WORDS][MAX_SIZE]) {
+// picks a random word from the word list (length of MAX_SIZE) to use as the base_word
+void pick_word(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE]) {
+    int i = 0;
+    for (;;) {
+        i = rand() % MAX_WORDS;
+        if (strlen(orig_list[i]) == MAX_SIZE-1) {
+            int j;
+            int used = 0;
+            for(j=0; j < server->num_rounds; j++) {
+                if (server->used_words[j] == i) {
+                    used = 1;
+                    break;
+                }
+            }
 
+            if (!used) {
+                strcpy(server->base_word, orig_list[i]);
+                server->used_words[j] = i;
+                break;
+            }
+        }
+    }
+}
+
+// generates a list of words based on the chosen base_word
+void generate_game_words(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE], char sort_list[MAX_WORDS][MAX_SIZE]) {
+    int comp_index = 0;
+    int list_loc = 0;
+
+    while (sort_list[comp_index] != NULL && comp_index < MAX_WORDS) {
+        int base_letter = 0;
+        int comp_letter = 0;
+        // check each letter
+        while (sort_list[comp_index][comp_letter] != '\0' && server->base_word_sorted[base_letter] != '\0') {
+            // if they are equal, continue
+            if (sort_list[comp_index][comp_letter] == server->base_word_sorted[base_letter]) {
+                comp_letter++;
+                base_letter++;
+            }
+            // if root letter is lower, increment
+            else if(server->base_word_sorted[base_letter] < sort_list[comp_index][comp_letter]) {
+                base_letter++;
+            }
+            // not a match, break out
+            else {
+                break;
+            }
+        }
+
+        // add the word if it fits
+        if (sort_list[comp_index][comp_letter] == '\0') {
+            strcpy(server->base_word_factors[list_loc], orig_list[comp_index]);
+            list_loc++;
+        }
+
+        comp_index++;
+    }
 }
