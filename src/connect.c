@@ -16,13 +16,13 @@ void *get_in_addr(struct sockaddr *sa)
 }
 
 //this gets passed a Server Info struct that is in the main program 
-//for general information, and passes back an fd_set for the list
+//for general information, and passes back an fd_set for tnhe list
 //of all connected parties, hopefully to make later selects easier.
 int start_server(Server_Info *serverinfo, fd_set *current_users)
 {
 	fd_set master;    // master file descriptor list
     fd_set read_fds;  // temp file descriptor list for select()
-    int biggest_fd;   // largest file descriptor number#include 
+    int biggest_fd;   // largest file descriptor number 
 
 	int listener;     // listening socket descriptor
     int newfd;        // newly accept()ed socket descriptor
@@ -89,68 +89,67 @@ int start_server(Server_Info *serverinfo, fd_set *current_users)
     // keep track of the biggest file descriptor
     biggest_fd = listener; // so far, it's this one
 
+	int select_result = 0;
+	struct timeval timeval;
+	timeval.tv_sec = 30;
+	timeval.tv_usec = 0;
+	
 	for(;;) {
         read_fds = master; // copy it
-        if (select(biggest_fd+1, &read_fds, NULL, NULL, NULL) == -1) {
+		
+		select_result = select(biggest_fd+1, &read_fds, NULL, NULL, timeval)
+        if (select_result == -1) {
             perror("select");
             exit(4);
         }
+		else if(select_result)
+		{
+        	// run through the existing connections looking for data to read
+	        for(i = 0; i <= biggest_fd; i++) {
+	            if (FD_ISSET(i, &read_fds)) { // we got one!!
+	                if (i == listener) {
+	                    // handle new connections
+	                    addrlen = sizeof remoteaddr;
+	                    newfd = accept(listener,
+	                        (struct sockaddr *)&remoteaddr,
+	                        &addrlen);
 
-        // run through the existing connections looking for data to read
-        for(i = 0; i <= biggest_fd; i++) {
-            if (FD_ISSET(i, &read_fds)) { // we got one!!
-                if (i == listener) {
-                    // handle new connections
-                    addrlen = sizeof remoteaddr;
-                    newfd = accept(listener,
-                        (struct sockaddr *)&remoteaddr,
-                        &addrlen);
-
-                    if (newfd == -1) {
-                        perror("accept");
-                    } else {
-                        FD_SET(newfd, &master); // add to master set
-                        if (newfd > biggest_fd) {    // keep track of the max
-                            biggest_fd = newfd;
-                        }
-                        printf("selectserver: new connection from %s on "
-                            "socket %d\n",
-                            inet_ntop(remoteaddr.ss_family,
-                                get_in_addr((struct sockaddr*)&remoteaddr),
-                                remoteIP, INET6_ADDRSTRLEN),
-                            newfd);
-                    }
-                } else {
-                    // handle data from a client
-                    if ((nbytes = recv(i, buf, sizeof buf, 0)) <= 0) {
-                        // got error or connection closed by client
-                        if (nbytes == 0) {
-                            // connection closed
-                            printf("selectserver: socket %d hung up\n", i);
-                        } else {
-                            perror("recv");
-                        }
-                        close(i); // bye!
-                        FD_CLR(i, &master); // remove from master set
-                    } else {
-                        // we got some data from a client
-                        for(j = 0; j <= biggest_fd; j++) {
-                            // send to everyone!
-                            if (FD_ISSET(j, &master)) {
-                                // except the listener and ourselves
-                                if (j != listener && j != i) {
-                                    if (send(j, buf, nbytes, 0) == -1) {
-                                        perror("send");
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } // END handle data from client
-            } // END got new incoming connection
-        } // END looping through file descriptors
+	                    if (newfd == -1) {
+	                        perror("accept");
+	                    } else {
+	                        FD_SET(newfd, &master); // add to master set
+	                        if (newfd > biggest_fd) {    // keep track of the max
+	                            biggest_fd = newfd;
+	                        }
+	                        printf("selectserver: new connection from %s on "
+	                            "socket %d\n",
+	                            inet_ntop(remoteaddr.ss_family,
+	                                get_in_addr((struct sockaddr*)&remoteaddr),
+	                                remoteIP, INET6_ADDRSTRLEN),
+	                            newfd);
+	                    }
+	                } else {
+	                    // handle data from a client
+	                    if ((nbytes = recv(i, buf, sizeof buf, 0)) <= 0) {
+	                        // got error or connection closed by client
+	                        if (nbytes == 0) {
+	                            // connection closed
+	                            printf("selectserver: socket %d hung up\n", i);
+	                        } else {
+	                            perror("recv");
+	                        }
+	                        close(i); // bye!
+	                        FD_CLR(i, &master); // remove from master set
+	                	} 
+	                } // END handle data from client
+	            } // END got new incoming connection
+	        } // END looping through file descriptors
+		} // END else if for if this is a thing
+		else
+		{
+			break;
+		}
     } // END for(;;)--and you thought it would never end!
-    
 	(*current_users) = master;
 	return 0;
 }
