@@ -4,7 +4,6 @@
 #include "server.h"
 #include "builder.h"
 
-
 // A helper function used by qsort that sorts each word
 // see qsort documentation if you're curious
 int sort_word(const void* word1, const void* word2) {
@@ -36,30 +35,41 @@ void read_list(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE], char so
             strcpy(orig_list[list_loc], current_word);
             qsort(current_word, word_size, 1, sort_word);
             strcpy(sort_list[list_loc], current_word);
-            printf("%s %s\n", orig_list[list_loc], sort_list[list_loc]);
+            list_loc++;
         }
     }
+
+    printf("Word Count: %d", list_loc);
+    server->total_words = list_loc;
 }
 
 // picks a random word from the word list (length of MAX_SIZE) to use as the base_word
-void pick_word(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE]) {
-    int i = 0;
-    for (;;) {
-        i = rand() % MAX_WORDS;
-        if (strlen(orig_list[i]) == MAX_SIZE-1) {
-            int j;
-            int used = 0;
-            for(j=0; j < server->num_rounds; j++) {
-                if (server->used_words[j] == i) {
-                    used = 1;
-                    break;
-                }
-            }
+void pick_word(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE], char sort_list[MAX_WORDS][MAX_SIZE]) {
+    bool found = false;
 
-            if (!used) {
-                strcpy(server->base_word, orig_list[i]);
-                server->used_words[j] = i;
-                break;
+    while(!found) {
+        //int i = rand() % MAX_WORDS;
+        int i = rand() % server->total_words;
+        for (; i <= MAX_WORDS; i++) {
+            if (strlen(orig_list[i]) == MAX_SIZE-1) {
+                int j;
+                bool used = false;
+                for(j=0; j < server->num_rounds; j++) {
+                    if (server->used_words[j] == i) {
+                        used = true;
+                        break;
+                    }
+                    else if (server->used_words[j] == 0) {
+                        break;
+                    }
+                }
+
+                if (!used) {
+                    strcpy(server->base_word, orig_list[i]);
+                    strcpy(server->base_word_sorted, sort_list[i]);
+                    server->used_words[j] = i;
+                    return;
+                }
             }
         }
     }
@@ -91,8 +101,9 @@ void generate_game_words(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE
         }
 
         // add the word if it fits
-        if (sort_list[comp_index][comp_letter] == '\0') {
-            strcpy(server->base_word_factors[list_loc], orig_list[comp_index]);
+        if (sort_list[comp_index][comp_letter] == '\0' && strlen(sort_list[comp_index]) != 0) {
+            server->base_word_factors[list_loc] = orig_list[comp_index];
+            printf("\tBase word %d: %s\n", list_loc, server->base_word_factors[list_loc]);
             list_loc++;
         }
 

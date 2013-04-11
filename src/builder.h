@@ -7,4 +7,6 @@ int sort_word(const void* word1, const void* word2);
 
 void read_list(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE], char sort_list[MAX_WORDS][MAX_SIZE]);
 
+void pick_word(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE], char sort_list[MAX_WORDS][MAX_SIZE]);
+
 void generate_game_words(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE], char sort_list[MAX_WORDS][MAX_SIZE]);

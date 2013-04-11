@@ -10,10 +10,11 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <time.h>
 
 #define ext_port "9876"  //external port we listen on
 #define max_users 10 	 //max number of users playing the game.
-#define max_rounds 10
+#define def_rounds 5
 
 typedef struct{
 	int points;		// current tally of the player's points
@@ -27,10 +28,12 @@ typedef struct{
 typedef struct {
 	Player players[max_users];	// an array of all current players in the game
 	FILE* word_list;		
+	char* port;
 	int num_players;			// to compare with the server maximum
 	int num_rounds;
+	int total_words;
 	char* base_word;			// the root word
 	char* base_word_sorted;		// base_word with letters in alphabetic order
 	char** base_word_factors;	// the list of words able to be made from base_word, in alphabetic order
-	int used_words[max_rounds];
+	int* used_words;
 } Server_Info;
