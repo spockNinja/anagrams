@@ -90,20 +90,21 @@ int start_server(Server_Info *serverinfo, fd_set *current_users)
     biggest_fd = listener; // so far, it's this one
 
 	int select_result = 0;
-	struct timeval timeval;
-	timeval.tv_sec = 30;
-	timeval.tv_usec = 0;
+	struct timeval tv;
+	tv.tv_sec = 30;
+	tv.tv_usec = 0;
 	
 	for(;;) {
         read_fds = master; // copy it
-		
-		select_result = select(biggest_fd+1, &read_fds, NULL, NULL, timeval)
+		printf("the time starting left is %i seconds.\n", (int)tv.tv_sec );
+		select_result = select(biggest_fd+1, &read_fds, NULL, NULL, &tv);
         if (select_result == -1) {
             perror("select");
             exit(4);
         }
 		else if(select_result)
 		{
+			printf("the time left is %i seconds.\n", (int)tv.tv_sec );
         	// run through the existing connections looking for data to read
 	        for(i = 0; i <= biggest_fd; i++) {
 	            if (FD_ISSET(i, &read_fds)) { // we got one!!
@@ -113,7 +114,7 @@ int start_server(Server_Info *serverinfo, fd_set *current_users)
 	                    newfd = accept(listener,
 	                        (struct sockaddr *)&remoteaddr,
 	                        &addrlen);
-
+						
 	                    if (newfd == -1) {
 	                        perror("accept");
 	                    } else {
@@ -150,6 +151,9 @@ int start_server(Server_Info *serverinfo, fd_set *current_users)
 			break;
 		}
     } // END for(;;)--and you thought it would never end!
+
+	printf("Done looking for users (30 seconds elapsed)\n");
+
 	(*current_users) = master;
 	return 0;
 }
