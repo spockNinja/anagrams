@@ -59,11 +59,7 @@ int main (int argc, char* argv[]) {
     int round;
     srand(time(0) + getpid());
     for (round=0; round < server_info.num_rounds; round++) {
-        printf("%s\n", "Picking word...");
         pick_word(&server_info, ORIG_LIST, SORT_LIST);
-        printf("The chosen word: %s\n", server_info.base_word);
-        printf("The chosen word - sorted: %s\n", server_info.base_word_sorted);
-        printf("%s\n", "Generating Game Words...");
         generate_game_words(&server_info, ORIG_LIST, SORT_LIST);
     }
 }

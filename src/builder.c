@@ -39,7 +39,6 @@ void read_list(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE], char so
         }
     }
 
-    printf("Word Count: %d", list_loc);
     server->total_words = list_loc;
 }
 
@@ -103,7 +102,6 @@ void generate_game_words(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE
         // add the word if it fits
         if (sort_list[comp_index][comp_letter] == '\0' && strlen(sort_list[comp_index]) != 0) {
             server->base_word_factors[list_loc] = orig_list[comp_index];
-            printf("\tBase word %d: %s\n", list_loc, server->base_word_factors[list_loc]);
             list_loc++;
         }
 
