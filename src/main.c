@@ -1,5 +1,6 @@
 #include "server.h"
 #include "builder.h"
+#include "connect.h"
 
 
 // The main server method
@@ -29,7 +30,6 @@ int main (int argc, char* argv[]) {
     }
 
     // read in the word list
-    //char* word_dict = "../../res/words";
     char* word_dict = "../res/words";
     char ORIG_LIST[MAX_WORDS][MAX_SIZE];
     char SORT_LIST[MAX_WORDS][MAX_SIZE];
