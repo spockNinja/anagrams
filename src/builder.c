@@ -131,7 +131,6 @@ void pick_word(Server_Info* server, struct word_node* list_head) {
 void generate_game_words(Server_Info* server, struct word_node* list_head) {
     int words_found = 0;
     struct word_node* current_node = list_head;
-    struct word_node* prev_node = NULL;
 
     while (current_node != NULL) {
         int base_letter = 0;
@@ -194,7 +193,6 @@ void generate_game_words(Server_Info* server, struct word_node* list_head) {
             }
         }
 
-        prev_node = current_node;
         current_node = current_node->next;
     }
 }
