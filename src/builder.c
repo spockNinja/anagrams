@@ -14,15 +14,42 @@ int sort_word(const void* word1, const void* word2) {
     return 0;
 }
 
+// A helper function to create and initialise a new word_node
+struct word_node* create_node(char* word, char* sorted_word, int len) {
+    struct word_node* new_node = (struct word_node*) malloc(sizeof(struct word_node));
+    new_node->word = malloc(sizeof(char) * (len+1));
+    new_node->sorted_word = malloc(sizeof(char) * (len+1));
+
+    strcpy(new_node->word, word);
+    strcpy(new_node->sorted_word, sorted_word);
+    new_node->len = len;
+    new_node->next = NULL;
+
+    return new_node;
+}
+
+void free_list(struct word_node* head) {
+    while(head != NULL) {
+        struct word_node* temp = head;
+        head = head->next;
+        free(temp);
+    }
+}
+
 // Reads every word in a file (each word on a line)
 // and stores the normal list in orig_list while storing a parallel list of sorted words in sort_list
-void read_list(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE], char sort_list[MAX_WORDS][MAX_SIZE]) {
+struct word_node* read_list(Server_Info* server, FILE* word_list) {
 
+    struct word_node* previous_node = NULL;
+    struct word_node* current_node = NULL;
+    struct word_node* head_node = NULL;
     char current_word[30];
-    int list_loc = 0;
 
-    while(!feof(server->word_list)) {
-        fgets(current_word, 30, server->word_list);
+    while(!feof(word_list)) {
+        char* read_result = fgets(current_word, 30, word_list);
+        if (read_result == NULL) {
+            break;
+        }
         int word_size = strlen(current_word);
 
         // strip out newlines
@@ -31,66 +58,93 @@ void read_list(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE], char so
             word_size = word_size-1;
         }
         // only include the word if it is the right size
-        if (word_size >= MIN_SIZE && word_size < MAX_SIZE) {
-            strcpy(orig_list[list_loc], current_word);
-            qsort(current_word, word_size, 1, sort_word);
-            strcpy(sort_list[list_loc], current_word);
-            list_loc++;
+        if (word_size >= MIN_WORD_SIZE && word_size <= MAX_WORD_SIZE) {
+            // copy and sort the word
+            char current_word_sorted[30];
+            strcpy(current_word_sorted, current_word);
+            qsort(current_word_sorted, word_size, sizeof(char), sort_word);
+
+            // create the new node
+            current_node = create_node(current_word, current_word_sorted, word_size);
+
+            // remember the head node to send back to main
+            if (head_node == NULL) {
+                head_node = current_node;
+            }
+            // keep the list linked even though we are using malloc
+            if (previous_node != NULL) {
+                previous_node->next = current_node;
+            }
+
+            // move to the next node
+            previous_node = current_node;
+            current_node = current_node->next;
+            server->total_words++;
         }
     }
 
-    server->total_words = list_loc;
+    return head_node;
 }
 
 // picks a random word from the word list (length of MAX_SIZE) to use as the base_word
-void pick_word(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE], char sort_list[MAX_WORDS][MAX_SIZE]) {
+void pick_word(Server_Info* server, struct word_node* list_head) {
     bool found = false;
+    struct word_node* current_node = list_head;
 
     while(!found) {
-        //int i = rand() % MAX_WORDS;
+        // pick a random spot in the list to start
         int i = rand() % server->total_words;
-        for (; i <= MAX_WORDS; i++) {
-            if (strlen(orig_list[i]) == MAX_SIZE-1) {
-                int j;
+
+        // get to that part of the list
+        int j;
+        for(j=0; j<i && current_node->next != NULL;j++) {
+            current_node = current_node->next;
+        }
+
+        // pick the closest valid word
+        while(current_node != NULL) {
+            if (current_node->len == MAX_WORD_SIZE) {
+                int k;
                 bool used = false;
-                for(j=0; j < server->num_rounds; j++) {
-                    if (server->used_words[j] == i) {
+                for(k=0; k < server->num_rounds; k++) {
+                    if (server->used_words[k] == i) {
                         used = true;
                         break;
                     }
-                    else if (server->used_words[j] == 0) {
+                    else if (server->used_words[k] == 0) {
                         break;
                     }
                 }
 
                 if (!used) {
-                    strcpy(server->base_word, orig_list[i]);
-                    strcpy(server->base_word_sorted, sort_list[i]);
+                    server->base_word = create_node(current_node->word, current_node->sorted_word, current_node->len);
                     server->used_words[j] = i;
                     return;
                 }
             }
+            current_node = current_node->next;
         }
     }
 }
 
 // generates a list of words based on the chosen base_word
-void generate_game_words(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE], char sort_list[MAX_WORDS][MAX_SIZE]) {
-    int comp_index = 0;
-    int list_loc = 0;
+void generate_game_words(Server_Info* server, struct word_node* list_head) {
+    int words_found = 0;
+    struct word_node* current_node = list_head;
+    struct word_node* prev_node = NULL;
 
-    while (sort_list[comp_index] != NULL && comp_index < MAX_WORDS) {
+    while (current_node != NULL) {
         int base_letter = 0;
         int comp_letter = 0;
         // check each letter
-        while (sort_list[comp_index][comp_letter] != '\0' && server->base_word_sorted[base_letter] != '\0') {
+        while (current_node->sorted_word[comp_letter] != '\0' && server->base_word->sorted_word[base_letter] != '\0') {
             // if they are equal, continue
-            if (sort_list[comp_index][comp_letter] == server->base_word_sorted[base_letter]) {
+            if (current_node->sorted_word[comp_letter] == server->base_word->sorted_word[base_letter]) {
                 comp_letter++;
                 base_letter++;
             }
             // if root letter is lower, increment
-            else if(server->base_word_sorted[base_letter] < sort_list[comp_index][comp_letter]) {
+            else if(server->base_word->sorted_word[base_letter] < current_node->sorted_word[comp_letter]) {
                 base_letter++;
             }
             // not a match, break out
@@ -100,11 +154,47 @@ void generate_game_words(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE
         }
 
         // add the word if it fits
-        if (sort_list[comp_index][comp_letter] == '\0' && strlen(sort_list[comp_index]) != 0) {
-            server->base_word_factors[list_loc] = orig_list[comp_index];
-            list_loc++;
+        if (current_node->sorted_word[comp_letter] == '\0') {
+            struct word_node* add_to_list;
+            switch(current_node->len) {
+                case 3:
+                    add_to_list = server->base_word_factors->threes;
+                    break;
+                case 4:
+                    add_to_list = server->base_word_factors->fours;
+                    break;
+                case 5:
+                    add_to_list = server->base_word_factors->fives;
+                    break;
+                case 6:
+                    add_to_list = server->base_word_factors->sixes;
+                    break;
+                case 7:
+                    add_to_list = server->base_word_factors->sevens;
+                    break;
+                case 8:
+                    add_to_list = server->base_word_factors->eights;
+                    break;
+            }
+
+            struct word_node* prev_node = NULL;
+            // get to the end of the list
+            while(add_to_list != NULL) {
+                prev_node = add_to_list;
+                add_to_list = add_to_list->next;
+            }
+
+            // copy the node *can't use the same pointer because it will mess up the source list*
+            add_to_list = create_node(current_node->word, current_node->sorted_word, current_node->len);
+            words_found++;
+
+            // keeping the list linked
+            if (prev_node != NULL) {
+                prev_node->next = add_to_list;
+            }
         }
 
-        comp_index++;
+        prev_node = current_node;
+        current_node = current_node->next;
     }
 }

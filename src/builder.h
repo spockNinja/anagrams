@@ -1,12 +1,12 @@
+// Defines things that external files need to know about builder.c
 
-#define MIN_SIZE 3
-#define MAX_SIZE 9 // 8 chars + '\0'
-#define MAX_WORDS 40000
+#define MIN_WORD_SIZE 3
+#define MAX_WORD_SIZE 8
 
-int sort_word(const void* word1, const void* word2);
+void free_list(struct word_node* head);
 
-void read_list(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE], char sort_list[MAX_WORDS][MAX_SIZE]);
+struct word_node* read_list(Server_Info* server, FILE* word_list);
 
-void pick_word(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE], char sort_list[MAX_WORDS][MAX_SIZE]);
+void pick_word(Server_Info* server, struct word_node* list_head);
 
-void generate_game_words(Server_Info* server, char orig_list[MAX_WORDS][MAX_SIZE], char sort_list[MAX_WORDS][MAX_SIZE]);
+void generate_game_words(Server_Info* server, struct word_node* list_head);
