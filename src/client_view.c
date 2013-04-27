@@ -1,113 +1,227 @@
+#define _BSD_SOURCE
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <signal.h>
-#include <curses.h>
+#include <ncurses.h>
 #include <panel.h>
 
-#define DEBUG_CLIENT_VIEW 1
 
 #define COLUMNS 80
 #define ROWS 25
 
+WINDOW *round_info;
+WINDOW *rankings;
+WINDOW *puzzle_words;
+WINDOW *word_input;
+WINDOW *prompt;
+WINDOW *bell;
 
-/*  This lists the start and end coordinates for the main sections as defined
-in the specification, section 4.1.
-There are four sections, and each section, as defined here, has a start
-and end coordinate. The values are ordered as:
-	startX, startY, numLines, numColumns 
-*/	
-int coords[5][4] = {
-	{0,  0, 4, 80},   // section 1: 4 lines, 80 columns
-	{59, 3, 21, 21},  // section 2: 21 lines, 20 columsn
-	{0,  3, 19, 60},  // section 3: 19 lines, 60 columns
-	{0, 21, 3, 60},   // section 4: 2 lines, 60 columns
-    {30, 8, 6, 20}    // confirm dialog
-};
+PANEL *my_panels[6];
 
-struct client_section {
-    char* label;
-    int startX;
-    int startY;
-    int numLines;
-    int NumColumns;
-};
-
-struct client_section round_info = { "", 0, 0, 4, 80};
-
-
-#if DEBUG_CLIENT_VIEW > 0
-static void finish(int sig);
+static void quit(int sig);
+static void draw_bell();
+static void draw_prompt();
+static void ring_bell();
 
 int main(){
-	(void) signal(SIGINT, finish);
+    // capture ctrl-c to ask if they want to quit
+    (void) signal(SIGINT, quit);
 
-	WINDOW *my_wins[5];
-	PANEL  *my_panels[5];
-	int lines = 10, cols = 40, y = 2, x = 4, i;
+    initscr();
+    cbreak();
+    noecho();
+
+    if (!has_colors()) {
+        endwin();
+        fprintf(stderr, "No color support on this terminal.\n");
+        exit(EXIT_FAILURE);
+    }
+    if (start_color() != OK) {
+        endwin();
+        fprintf(stderr, "Error - could not initialize colors.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Create windows for each section of the screen
+    round_info = newwin(4, 80, 0, 0);
+    rankings = newwin(21, 20, 4, 60);
+    puzzle_words = newwin(18, 60, 4, 0);
+    word_input = newwin(3, 60, 22, 0);
+    prompt = newwin(5, 35, 8, 20);
+    bell = newwin(6, 13, 8, 30);
+
+    // Do a on-time draw for bell and prompt
+    // they shouldn't have to change throughout
+    draw_bell();
+    draw_prompt();
+
+    // Attach overlapping windows to panels
+    // putting word_input up last to be on top
+    my_panels[0] = new_panel(prompt);
+    my_panels[1] = new_panel(rankings);
+    my_panels[2] = new_panel(puzzle_words);
+    my_panels[3] = new_panel(round_info);
+    my_panels[4] = new_panel(bell);
+    my_panels[5] = new_panel(word_input);
+
+    // Create borders around the windows
+    box(round_info, 0, 0);
+    box(rankings, 0, 0);
+    box(puzzle_words, 0, 0);
+    box(word_input, 0, 0);
+    box(prompt, 0, 0);
+
+    // Make sure the prompt and bell are hidden to start
+    hide_panel(my_panels[4]);
+    hide_panel(my_panels[0]);
+
+    // Update the stacking order
+    update_panels();
+
+    // Show it on the screen
+    doupdate();
+
+    // move the cursor to the beginning of the word_input box
+    wmove(word_input, 1, 1);
+
+    char *current_word = calloc(9, sizeof(char));
+
+    // process input as long as it keeps coming
     int ch;
+    for (;;) {
+        int len = strlen(current_word);
+        ch = getch();
+        switch(ch) {
+            case 8:
+            case 127:
+                // backspace and delete
+                if (len > 0) {
+                    *(current_word + len - 1) = '\0';
+                    mvwdelch(word_input, 1, len);
+                    winsch(word_input, ' ');
+                    wmove(word_input, 1, len);
+                    wrefresh(word_input);
+                }
+                else {
+                    ring_bell();
+                }
+                break;
+            case 9:
+            case 32:
+                // space, tab, ctrl-i
+                // TODO implement auto-fill words
+                break;
+            case 10:
+            case 13:
+                // return
+                // TODO send word and clear
+                break;
+            default:
+                // anything else
 
-
-	initscr();
-	cbreak();
-	noecho();
-
-	if (!has_colors()) {
-		fprintf(stderr, "No color support on this terminal\n");
-		exit(1);
-	}
-	if (start_color() != OK) {
-		endwin();
-		fprintf(stderr, "Error - could not initialize colors\n");
-		exit(2);
-	}
-
-	/* Create windows for the panels */
-	my_wins[0] = newwin(coords[0][2], coords[0][3], coords[0][1], coords[0][0]);
-	my_wins[1] = newwin(coords[1][2], coords[1][3], coords[1][1], coords[1][0]);
-	my_wins[2] = newwin(coords[2][2], coords[2][3], coords[2][1], coords[2][0]);
-	my_wins[3] = newwin(coords[3][2], coords[3][3], coords[3][1], coords[3][0]);
-	my_wins[4] = newwin(coords[4][2], coords[4][3], coords[4][1], coords[4][0]);
-
-	/* 
-	 * Create borders around the windows so that you can see the effect
-	 * of panels
-	 */
-	for(i = 0; i < 5; ++i)
-		box(my_wins[i], 0, 0);
-
-	/* Attach a panel to each window */ 	/* Order is bottom up */
-	my_panels[0] = new_panel(my_wins[0]); 	/* Push 0, order: stdscr-0 */
-	my_panels[1] = new_panel(my_wins[1]); 	/* Push 1, order: stdscr-0-1 */
-	my_panels[2] = new_panel(my_wins[2]); 	/* Push 2, order: stdscr-0-1-2 */
-	my_panels[3] = new_panel(my_wins[3]); 	/* Push 3, order: stdscr-0-1-3 */
-	my_panels[4] = new_panel(my_wins[4]); 	/* Push 3, order: stdscr-0-1-3 */
-
-	/* Update the stacking order. my_panels[2] will be on top */
-	update_panels();
-
-	/* Show it on the screen */
-	doupdate();
-
-    while ((ch = getch()) != KEY_F(1)){
-        if (ch >= 'a' && ch <='z'){
-            
+                // make lowercase uppercase
+                if (ch >= 'a' && ch <= 'z') {
+                    ch = ch - 32;
+                }
+                if (ch >= 'A' && ch <= 'Z') {
+                    if (len < 8) {
+                        *(current_word + len) = ch;
+                        wechochar(word_input, ch);
+                    }
+                    else {
+                        ring_bell();
+                    }
+                }
+                break;
         }
     }
-	
-	getch();
-	endwin();
-}
 
-
-static void finish(int sig)
-{
     endwin();
-
-    /* do your non-curses wrapup here */
-
-    exit(0);
 }
 
+static void ring_bell() {
+    top_panel(my_panels[4]);
+    update_panels();
+    doupdate();
+    usleep(100000);
+    hide_panel(my_panels[4]);
+    update_panels();
+    doupdate();
+};
 
-#endif
+static void draw_prompt() {
+    wmove(prompt, 1, 1);
+    waddstr(prompt, " Are your sure you want to quit?");
+
+    wmove(prompt, 2, 1);
+    waddstr(prompt, " Press y or Y to confirm.");
+
+    wmove(prompt, 3, 1);
+    waddstr(prompt, " Press anything else to dismiss.");
+
+    wrefresh(prompt);
+};
+
+static void draw_bell() {
+    mvwaddch(bell, 0, 4, '_');
+    mvwaddch(bell, 0, 5, '(');
+    mvwaddch(bell, 0, 6, '#');
+    mvwaddch(bell, 0, 7, ')');
+    mvwaddch(bell, 0, 8, '_');
+
+    mvwaddch(bell, 1, 3, '/');
+    mvwaddch(bell, 1, 9, '\\');
+
+    mvwaddch(bell, 2, 2, '|');
+    mvwaddch(bell, 2, 10, '|');
+
+    mvwaddch(bell, 3, 2, '|');
+    mvwaddch(bell, 3, 3, '_');
+    mvwaddch(bell, 3, 4, '_');
+    mvwaddch(bell, 3, 5, '_');
+    mvwaddch(bell, 3, 6, '_');
+    mvwaddch(bell, 3, 7, '_');
+    mvwaddch(bell, 3, 8, '_');
+    mvwaddch(bell, 3, 9, '_');
+    mvwaddch(bell, 3, 10, '|');
+
+    mvwaddch(bell, 4, 1, '/');
+    mvwaddch(bell, 4, 11, '\\');
+
+    mvwaddch(bell, 5, 0, '|');
+    mvwaddch(bell, 5, 1, '=');
+    mvwaddch(bell, 5, 2, '=');
+    mvwaddch(bell, 5, 3, '=');
+    mvwaddch(bell, 5, 4, '=');
+    mvwaddch(bell, 5, 5, '(');
+    mvwaddch(bell, 5, 6, '-');
+    mvwaddch(bell, 5, 7, ')');
+    mvwaddch(bell, 5, 8, '=');
+    mvwaddch(bell, 5, 9, '=');
+    mvwaddch(bell, 5, 10, '=');
+    mvwaddch(bell, 5, 11, '=');
+    mvwaddch(bell, 5, 12, '|');
+
+    wrefresh(bell);
+};
+
+
+static void quit(int sig)
+{
+    top_panel(my_panels[0]);
+    update_panels();
+    doupdate();
+
+    int response = getch();
+    if (response == 'y' || response == 'Y') {
+        endwin();
+        exit(0);
+    }
+
+    hide_panel(my_panels[0]);
+    update_panels();
+    doupdate();
+}
