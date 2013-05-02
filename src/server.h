@@ -12,9 +12,15 @@
 #include <netdb.h>
 #include <time.h>
 
-#define ext_port "9876"  //external port we listen on
-#define max_users 10 	 //max number of users playing the game.
+//external port we listen on
+#define ext_port "9876"
+
+//max number of users playing the game.
+#define max_users 10
+
+// default number of rounds to be played
 #define def_rounds 5
+
 
 typedef struct {
 	int points;		// current tally of the player's points
@@ -27,13 +33,13 @@ typedef struct {
 
 typedef struct {
 	Player players[max_users];	// an array of all current players in the game
-	char* port;
+	char* port;                 // the communications port used for client-server comm.
 	int num_players;			// to compare with the server maximum
-	int num_rounds;
-	int total_words;
-	int* used_words;
-	struct word_node* base_word;
-	struct word_set* base_word_factors;
+	int num_rounds;             // number of rounds to be played
+	int total_words;            // total number of words which can be made from base_word
+	int* used_words;            // ?? number of words guessed ??
+	struct word_node* base_word;        // the word from which all others can be made
+	struct word_set* base_word_factors; // the words which can be made from base_word
 } Server_Info;
 
 struct word_node {
