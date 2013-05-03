@@ -28,6 +28,7 @@ struct word_node* create_node(char* word, char* sorted_word, int len) {
     return new_node;
 }
 
+// Frees all the memory for a list that starts with head
 void free_list(struct word_node* head) {
     while(head != NULL) {
         struct word_node* temp = head;
@@ -86,7 +87,7 @@ struct word_node* read_list(Server_Info* server, FILE* word_list) {
     return head_node;
 }
 
-// picks a random word from the word list (length of MAX_SIZE) to use as the base_word
+// picks a random word from the word list (length of MAX_WORD_SIZE) to use as the base_word
 void pick_word(Server_Info* server, struct word_node* list_head) {
     bool found = false;
     struct word_node* current_node = list_head;
