@@ -32,8 +32,10 @@ struct word_node* history_head = NULL;
 static void quit();
 static void draw_bell();
 static void draw_prompt();
+static void draw_round_info();
 static void ring_bell();
-static void send_word(char*);
+static void update_round_info(int round, char* letters, char* timestamp);
+static void send_word(char* word);
 
 int main(){
     // The client will be dumb and single threaded.
@@ -61,10 +63,10 @@ int main(){
     prompt = newwin(5, 35, 8, 20);
     bell = newwin(6, 13, 8, 30);
 
-    // Do a one-time draw for bell and prompt
-    // they shouldn't have to change throughout
+    // Do a one-time draw for things that shouldn't have to change
     draw_bell();
     draw_prompt();
+    draw_round_info();
 
     // Attach overlapping windows to panels
     // putting word_input up last to be on top
@@ -153,6 +155,8 @@ int main(){
                 // if the current_word is size 0, autofill with last word
                 if (len == 0) {
                     strcpy(current_word, history_head->word);
+                    waddstr(word_input, current_word);
+                    wrefresh(word_input);
                 }
                 // otherwise, find the first word that begins with current word
                 else {
@@ -163,6 +167,8 @@ int main(){
                             strcpy(current_word, history_next->word);
                             mvwaddstr(word_input, 1, 1, clr_wrd);
                             wmove(word_input, 1, 1);
+                            waddstr(word_input, current_word);
+                            wrefresh(word_input);
                             break;
                         }
                         history_next = history_next->next;
@@ -170,8 +176,6 @@ int main(){
                 }
 
                 // draw the updated word to the screen
-                waddstr(word_input, current_word);
-                wrefresh(word_input);
                 break;
             case '\x03':
             case '\x11':
@@ -201,10 +205,6 @@ int main(){
     endwin();
 }
 
-static void update_round_info() {
-
-};
-
 static void send_word(char *word) {
 };
 
@@ -219,24 +219,14 @@ static void ring_bell() {
 };
 
 static void draw_prompt() {
-    wmove(prompt, 1, 1);
-    waddstr(prompt, " Are your sure you want to quit?");
-
-    wmove(prompt, 2, 1);
-    waddstr(prompt, " Press y or Y to confirm.");
-
-    wmove(prompt, 3, 1);
-    waddstr(prompt, " Press anything else to dismiss.");
-
+    mvwaddstr(prompt, 1, 1, " Are your sure you want to quit?");
+    mvwaddstr(prompt, 2, 1, " Press y or Y to confirm.");
+    mvwaddstr(prompt, 3, 1, " Press anything else to dismiss.");
     wrefresh(prompt);
 };
 
 static void draw_bell() {
-    mvwaddch(bell, 0, 4, '_');
-    mvwaddch(bell, 0, 5, '(');
-    mvwaddch(bell, 0, 6, '#');
-    mvwaddch(bell, 0, 7, ')');
-    mvwaddch(bell, 0, 8, '_');
+    mvwaddstr(bell, 0, 4, "_(#)_");
 
     mvwaddch(bell, 1, 3, '/');
     mvwaddch(bell, 1, 9, '\\');
@@ -244,36 +234,22 @@ static void draw_bell() {
     mvwaddch(bell, 2, 2, '|');
     mvwaddch(bell, 2, 10, '|');
 
-    mvwaddch(bell, 3, 2, '|');
-    mvwaddch(bell, 3, 3, '_');
-    mvwaddch(bell, 3, 4, '_');
-    mvwaddch(bell, 3, 5, '_');
-    mvwaddch(bell, 3, 6, '_');
-    mvwaddch(bell, 3, 7, '_');
-    mvwaddch(bell, 3, 8, '_');
-    mvwaddch(bell, 3, 9, '_');
-    mvwaddch(bell, 3, 10, '|');
+    mvwaddstr(bell, 3, 2, "|_______|");
 
     mvwaddch(bell, 4, 1, '/');
     mvwaddch(bell, 4, 11, '\\');
 
-    mvwaddch(bell, 5, 0, '|');
-    mvwaddch(bell, 5, 1, '=');
-    mvwaddch(bell, 5, 2, '=');
-    mvwaddch(bell, 5, 3, '=');
-    mvwaddch(bell, 5, 4, '=');
-    mvwaddch(bell, 5, 5, '(');
-    mvwaddch(bell, 5, 6, '-');
-    mvwaddch(bell, 5, 7, ')');
-    mvwaddch(bell, 5, 8, '=');
-    mvwaddch(bell, 5, 9, '=');
-    mvwaddch(bell, 5, 10, '=');
-    mvwaddch(bell, 5, 11, '=');
-    mvwaddch(bell, 5, 12, '|');
+    mvwaddstr(bell, 5, 0, "|====(-)====|");
 
     wrefresh(bell);
 };
 
+static void draw_round_info() {
+    mvwaddstr(round_info, 1, 1, "Round:");
+    mvwaddstr(round_info, 1, 65, "Time Remaining:");
+
+    wrefresh(round_info);
+};
 
 static void quit()
 {
