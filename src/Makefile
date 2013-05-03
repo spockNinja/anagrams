@@ -1,18 +1,28 @@
 CC=c99
-BINS=server main.o builder.o accept.o client
+BINS=server client
+OBJS=main.o builder.o accept.o word_list.o
+D_BINS=debug_server debug_client d_main.o d_builder.o d_accept.o d_connect.o d_word_list.o
+SERVER_BINS=main.o builder.o accept.o word_list.o
+D_SERVER_BINS=d_main.o d_builder.o d_accept.o d_connect.o d_word_list.o
 
-all: $(BINS)
+all: $(BINS) $(OBJS)
 
-debug: debug_server d_main.o d_builder.o d_accept.o d_connect.o
+debug: $(D_BINS)
 
 clean:
-	rm $(BINS)
+	rm $(OBJS)
 
-server: builder.o accept.o connect.o main.o
-	$(CC) -o server builder.o accept.o connect.o main.o
+d_clean:
+	rm $(D_BINS)
 
-client: client_view.c
-	$(CC) client_view.c -lpanel -lncurses -o client
+server: $(SERVER_BINS)
+	$(CC) $(SERVER_BINS) -o server
+
+client: client.c word_list.o
+	$(CC) client.c -lpanel -lncurses word_list.o -o client
+
+word_list.o: word_list.c word_list.h
+	$(CC) -c word_list.c
 
 main.o: main.c
 	$(CC) -c main.c
@@ -26,8 +36,8 @@ accept.o: accept.c
 connect.o: connect.c
 	$(CC) -c connect.c
 
-debug_server: d_builder.o d_accept.o d_connect.o d_main.o
-	$(CC) -g -o debug_server builder.o accept.o connect.o main.o
+debug_server: d_builder.o d_accept.o d_connect.o d_word_list.o d_main.o
+	$(CC) -g -o debug_server d_builder.o d_accept.o d_connect.o d_word_list.o d_main.o
 
 d_main.o: main.c
 	$(CC) -g -c main.c
@@ -40,3 +50,6 @@ d_accept.o: accept.c
 
 d_connect.o: connect.c
 	$(CC) -g -c connect.c
+
+d_word_list.o: word_list.c word_list.h
+	$(CC) -g -c word_list.c

@@ -11,6 +11,7 @@
 
 #define COLUMNS 80
 #define ROWS 25
+#define clr_wrd "                                                          |"
 
 WINDOW *round_info;
 WINDOW *rankings;
@@ -21,17 +22,20 @@ WINDOW *bell;
 
 PANEL *my_panels[6];
 
-static void quit(int sig);
+//just a sample - will come from server
+char *round_letters = "BEEEILSV";
+
+static void quit();
 static void draw_bell();
 static void draw_prompt();
 static void ring_bell();
+static void send_word(char*);
 
 int main(){
-    // capture ctrl-c to ask if they want to quit
-    (void) signal(SIGINT, quit);
-
+    // The client will be dumb and single threaded.
+    // All of it will be contained in this file
     initscr();
-    cbreak();
+    raw();
     noecho();
 
     if (!has_colors()) {
@@ -53,7 +57,7 @@ int main(){
     prompt = newwin(5, 35, 8, 20);
     bell = newwin(6, 13, 8, 30);
 
-    // Do a on-time draw for bell and prompt
+    // Do a one-time draw for bell and prompt
     // they shouldn't have to change throughout
     draw_bell();
     draw_prompt();
@@ -109,15 +113,28 @@ int main(){
                     ring_bell();
                 }
                 break;
+            case 10:
+            case 13:
+                // return
+                if (len > 0) {
+                    send_word(current_word);
+
+                    // reset word and clear the input area
+                    memset(current_word, 0, len);
+                    mvwaddstr(word_input, 1, 1, clr_wrd);
+                    wmove(word_input, 1, 1);
+                    wrefresh(word_input);
+                    break;
+                }
+                // else don't break and behave like space/tab/ctrl-i
             case 9:
             case 32:
                 // space, tab, ctrl-i
                 // TODO implement auto-fill words
                 break;
-            case 10:
-            case 13:
-                // return
-                // TODO send word and clear
+            case '\x03':
+            case '\x11':
+                quit();
                 break;
             default:
                 // anything else
@@ -127,7 +144,7 @@ int main(){
                     ch = ch - 32;
                 }
                 if (ch >= 'A' && ch <= 'Z') {
-                    if (len < 8) {
+                    if (len < 8 && strchr(round_letters, ch) != NULL) {
                         *(current_word + len) = ch;
                         wechochar(word_input, ch);
                     }
@@ -141,6 +158,13 @@ int main(){
 
     endwin();
 }
+
+static void update_round_info() {
+
+};
+
+static void send_word(char *word) {
+};
 
 static void ring_bell() {
     top_panel(my_panels[4]);
@@ -209,7 +233,7 @@ static void draw_bell() {
 };
 
 
-static void quit(int sig)
+static void quit()
 {
     top_panel(my_panels[0]);
     update_panels();
