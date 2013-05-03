@@ -7,7 +7,7 @@
 #include <signal.h>
 #include <ncurses.h>
 #include <panel.h>
-
+#include "word_list.h"
 
 #define COLUMNS 80
 #define ROWS 25
@@ -24,6 +24,10 @@ PANEL *my_panels[6];
 
 //just a sample - will come from server
 char *round_letters = "BEEEILSV";
+
+// The history linked list will have words added to the front
+// to make it easy to traverse in last-added order
+struct word_node* history_head = NULL;
 
 static void quit();
 static void draw_bell();
@@ -93,6 +97,9 @@ int main(){
 
     char *current_word = calloc(9, sizeof(char));
 
+    // temp node since you can't declare inside switch
+    struct word_node* history_next = NULL;
+
     // process input as long as it keeps coming
     int ch;
     for (;;) {
@@ -117,6 +124,12 @@ int main(){
             case 13:
                 // return
                 if (len > 0) {
+                    // add word to history
+                    history_next = create_node(current_word, "", len);
+                    history_next->next = history_head;
+                    history_head = history_next;
+
+                    // send word to server
                     send_word(current_word);
 
                     // reset word and clear the input area
@@ -129,11 +142,40 @@ int main(){
                 // else don't break and behave like space/tab/ctrl-i
             case 9:
             case 32:
-                // space, tab, ctrl-i
-                // TODO implement auto-fill words
+                // space & tab -- auto-complete words
+
+                // if no words have been entered, ring_bell()
+                if (history_head == NULL) {
+                    ring_bell();
+                    break;
+                }
+
+                // if the current_word is size 0, autofill with last word
+                if (len == 0) {
+                    strcpy(current_word, history_head->word);
+                }
+                // otherwise, find the first word that begins with current word
+                else {
+                    history_next = history_head;
+                    while (history_next != NULL) {
+                        if (strncmp(current_word, history_next->word, len) == 0) {
+                            memset(current_word, 0, len);
+                            strcpy(current_word, history_next->word);
+                            mvwaddstr(word_input, 1, 1, clr_wrd);
+                            wmove(word_input, 1, 1);
+                            break;
+                        }
+                        history_next = history_next->next;
+                    }
+                }
+
+                // draw the updated word to the screen
+                waddstr(word_input, current_word);
+                wrefresh(word_input);
                 break;
             case '\x03':
             case '\x11':
+                // ctrl-c and ctrl-q -- quit
                 quit();
                 break;
             default:
