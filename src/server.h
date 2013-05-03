@@ -42,14 +42,6 @@ typedef struct {
 	struct word_set* base_word_factors; // the words which can be made from base_word *changes each round*
 } Server_Info;
 
-// A node for linked lists of words *must be defined as 'struct word_node' because of recursive nature
-struct word_node {
-    char* word;
-    char* sorted_word;
-    int len;
-    struct word_node* next;
-};
-
 // A set of linked lists, one for each possible word length
 struct word_set {
     struct word_node* threes;

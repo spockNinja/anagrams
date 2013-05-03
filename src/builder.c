@@ -3,6 +3,7 @@
 
 #include "server.h"
 #include "builder.h"
+#include "word_list.h"
 
 // A helper function used by qsort that sorts each word
 // see qsort documentation if you're curious
@@ -12,29 +13,6 @@ int sort_word(const void* word1, const void* word2) {
     if (a > b) return 1;
     if (a < b) return -1;
     return 0;
-}
-
-// A helper function to create and initialise a new word_node
-struct word_node* create_node(char* word, char* sorted_word, int len) {
-    struct word_node* new_node = (struct word_node*) malloc(sizeof(struct word_node));
-    new_node->word = malloc(sizeof(char) * (len+1));
-    new_node->sorted_word = malloc(sizeof(char) * (len+1));
-
-    strcpy(new_node->word, word);
-    strcpy(new_node->sorted_word, sorted_word);
-    new_node->len = len;
-    new_node->next = NULL;
-
-    return new_node;
-}
-
-// Frees all the memory for a list that starts with head
-void free_list(struct word_node* head) {
-    while(head != NULL) {
-        struct word_node* temp = head;
-        head = head->next;
-        free(temp);
-    }
 }
 
 // Reads every word in a file (each word on a line)
