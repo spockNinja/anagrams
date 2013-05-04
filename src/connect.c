@@ -18,7 +18,7 @@ void *get_in_addr(struct sockaddr *sa)
 //this gets passed a Server Info struct that is in the main program 
 //for general information, and passes back an fd_set for tnhe list
 //of all connected parties, hopefully to make later selects easier.
-int start_server(Server_Info *serverinfo, fd_set *current_users)
+int start_server(fd_set *current_users)
 {
 	fd_set master;    // master file descriptor list
     fd_set read_fds;  // temp file descriptor list for select()
@@ -47,6 +47,8 @@ int start_server(Server_Info *serverinfo, fd_set *current_users)
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
+    char *ext_port = server_info.port; 
+    
     if ((rv = getaddrinfo(NULL, ext_port, &hints, &ai)) != 0) {
         fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
         exit(1);
@@ -88,7 +90,6 @@ int start_server(Server_Info *serverinfo, fd_set *current_users)
 
     // keep track of the biggest file descriptor
     biggest_fd = listener; // so far, it's this one
-
 	int select_result = 0;
 	struct timeval tv;
 	tv.tv_sec = 30;
@@ -123,11 +124,33 @@ int start_server(Server_Info *serverinfo, fd_set *current_users)
 	                            biggest_fd = newfd;
 	                        }
 	                        printf("selectserver: new connection from %s on "
-	                            "socket %d\n",
-	                            inet_ntop(remoteaddr.ss_family,
-	                                get_in_addr((struct sockaddr*)&remoteaddr),
-	                                remoteIP, INET6_ADDRSTRLEN),
-	                            newfd);
+	                            "socket %d\n", inet_ntop(remoteaddr.ss_family,
+	                                           get_in_addr((struct sockaddr*)&remoteaddr),
+	                                           remoteIP, INET6_ADDRSTRLEN),
+    	                                       newfd);
+	                        
+	                        if(server_info.num_players+1 <= max_users){
+	                            server_info.num_players++;
+	                            Player new_player;
+	                            new_player.portnumber = newfd;
+	                            new_player.connected = true;
+	                            new_player.points = 0;
+	                            for(int j = 0; j<server_info.num_players;j++)
+	                            {
+	                                if(server_info.players[j].portnumber == null_player.portnumber)
+	                                {
+	                                    new_player.color = j;
+	                                    server_info.players[j] = new_player;
+	                                    break;
+	                                }       
+	                            }
+	                        }
+	                        else
+	                        {
+	                            printf("connection on socket %d refused\n", newfd);
+	                            //write to the port that they're too late   
+	                        }
+	                            
 	                    }
 	                } else {
 	                    // handle data from a client
@@ -136,6 +159,14 @@ int start_server(Server_Info *serverinfo, fd_set *current_users)
 	                        if (nbytes == 0) {
 	                            // connection closed
 	                            printf("selectserver: socket %d hung up\n", i);
+	                            for(int j = 0; j<server_info.num_players; j++)
+	                            {
+	                                if(server_info.players[j].portnumber == i)
+	                                {
+	                                    server_info.players[j] = null_player;
+	                                    server_info.num_players--;
+	                                }
+	                            }
 	                        } else {
 	                            perror("recv");
 	                        }

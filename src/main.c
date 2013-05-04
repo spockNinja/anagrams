@@ -27,7 +27,6 @@ int main (int argc, char* argv[]) {
     // do we need to set up initialize server_info here?
 
     fd_set current_users;
-
     server_info.port = argv[1];
 
     if (argc >= 3) {
@@ -50,16 +49,26 @@ int main (int argc, char* argv[]) {
     else {
         word_list_path = "/460/words";
     }
-
     // Open the file for reading
     FILE* word_list = fopen(word_list_path, "r");
     if (word_list == NULL) {
         perror(word_list_path);
         exit(EXIT_FAILURE);
-    }
-
+    }    
+    
+    // initialize null player
+    null_player.points = 0;
+    null_player.color = 0;
+    null_player.username = "";
+    null_player.portnumber = 0;
+    null_player.connected = false;
+    null_player.ready = false;
+    
     // initialise server variables
+    server_info.num_players = 0;
     server_info.total_words = 0;
+    for(int i = 0; i<max_users; i++)
+        server_info.players[i] = null_player;
     server_info.used_words = calloc(server_info.num_rounds, sizeof(int));
     server_info.base_word_factors = malloc(sizeof(struct word_set));
     server_info.base_word_factors->threes = NULL;
@@ -73,7 +82,7 @@ int main (int argc, char* argv[]) {
 
     FD_ZERO(&current_users);
 
-    start_server(&server_info, &current_users);
+    start_server(&current_users);
 
     // once players are connected, play through all the rounds
     int round;

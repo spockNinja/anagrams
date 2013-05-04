@@ -17,7 +17,7 @@
 
 
 //external port we listen on
-#define ext_port "9876"
+//#define ext_port "9876"
 
 //max number of users playing the game.
 #define max_users 10
@@ -28,16 +28,16 @@
 //Player datatype
 typedef struct {
 	int points;		// current tally of the player's points
-	int color;		// 0-9 preset colors
+	int color;		// 0-9 preset colors, also works as their index
 	char* username; // hurr durr, this is the username
-	int portnumber;	// do we need this? #MAYBE
+	int portnumber;	// the port over whhich the user is communicating
 	bool connected;	// whether or not the client is currently connected
-	bool ready;		// whether or not the client is ready for a round
+	bool ready;		// whether or not the client is ready for a round (may get to)
 } Player;
 
 //Server_Info datatype
 typedef struct {
-	Player* players;	// an array of all current players in the game
+	Player players[max_users];	// an array of all current players in the game
 	char* port;                 // the communications port used for client-server comm.
 	int num_players;			// to compare with the server maximum
 	int num_rounds;             // number of rounds to be played
@@ -60,3 +60,4 @@ struct word_set {
 
 
 Server_Info server_info; // global access for this instance
+Player null_player;
