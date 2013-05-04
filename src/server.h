@@ -39,19 +39,13 @@ typedef struct {
 	char* port;                 // the communications port used for client-server comm.
 	int num_players;			// to compare with the server maximum
 	int num_rounds;             // number of rounds to be played
-	int total_words;            // total number of words which can be made from base_word
-	int* used_words;            // ?? number of words guessed ??
-	struct word_node* base_word;        // the word from which all others can be made
-	struct word_set* base_word_factors; // the words which can be made from base_word
+	int total_words;                    // total number of words in the main word list
+	int* used_words;                    // int array containing indeces of words used as base_words
+	struct word_node* base_word;        // the word from which all others can be made *changes each round*
+	struct word_set* base_word_factors; // the words which can be made from base_word *changes each round*
 } Server_Info;
 
-struct word_node {
-    char* word;
-    char* sorted_word;
-    int len;
-    struct word_node* next;
-};
-
+// A set of linked lists, one for each possible word length
 struct word_set {
     struct word_node* threes;
     struct word_node* fours;

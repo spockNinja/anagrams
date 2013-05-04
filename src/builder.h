@@ -3,8 +3,6 @@
 #define MIN_WORD_SIZE 3
 #define MAX_WORD_SIZE 8
 
-void free_list(struct word_node* head);
-
 struct word_node* read_list(Server_Info* server, FILE* word_list);
 
 void pick_word(Server_Info* server, struct word_node* list_head);
