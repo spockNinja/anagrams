@@ -82,7 +82,7 @@ int main (int argc, char* argv[]) {
         reset_server_info(&server_info);
         pick_word(&server_info, list_head);
         generate_game_words(&server_info, list_head);
-        server_info.least_common_characters = get_rare_chars(server_info.base_word->word);
+        server_info.least_common_characters = get_rare_chars(server_info.base_word->sorted_word, server_info.base_word->len);
     }
 }
 

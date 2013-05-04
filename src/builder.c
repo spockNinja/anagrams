@@ -177,6 +177,34 @@ void generate_game_words(Server_Info* server, struct word_node* list_head) {
 }
 
 char* get_rare_chars(const char* base){
-
-    return "";
+    
+    //least common characters
+    int base_len = strlen(base);
+    int lcc = base_len;
+    char *result = malloc(sizeof(char) * base_len);
+    for(int i = 0; i<base_len;)
+    {
+        //current character count
+        int ccc = 0;
+        //base character
+        char bc[2] = {base[i], '\0'};
+        for(i; i<base_len;i++)
+        {
+            if (base[i] == bc[0])
+                ccc++;
+            else
+                break;
+        }
+        //result = (ccc < lcc ? &bc : ccc == lcc ? strcat(result, &bc):result);
+        if(ccc<lcc)
+        {
+            lcc = ccc;
+            strcpy(result, bc);
+        }
+        else if(ccc == lcc)
+        {
+            strcpy(result, strcat(result, bc));
+        }
+    }
+    return result;
 }
