@@ -1,3 +1,5 @@
+#define _XOPEN_SOURCE 500
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -11,6 +13,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <time.h>
+
 
 //external port we listen on
 #define ext_port "9876"
