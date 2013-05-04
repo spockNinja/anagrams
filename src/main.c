@@ -3,6 +3,8 @@
 #include "word_list.h"
 #include "connect.h"
 
+Server_Info server_info;
+
 // Resets server data for each round
 void reset_server_info(Server_Info* server) {
     free_list(server->base_word_factors->threes);
@@ -23,7 +25,8 @@ int main (int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    Server_Info server_info;
+    // do we need to set up initialize server_info here?
+
     fd_set current_users;
 
     server_info.port = argv[1];
