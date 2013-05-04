@@ -37,7 +37,7 @@ typedef struct {
 
 //Server_Info datatype
 typedef struct {
-	Player players[max_users];	// an array of all current players in the game
+	Player* players;	// an array of all current players in the game
 	char* port;                 // the communications port used for client-server comm.
 	int num_players;			// to compare with the server maximum
 	int num_rounds;             // number of rounds to be played
@@ -57,3 +57,5 @@ struct word_set {
     struct word_node* eights;
 };
 
+
+Server_Info server_info; // global access for this instance

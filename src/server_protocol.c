@@ -24,6 +24,7 @@ void update_score(unsigned int player_index, unsigned int score){
     send_update(cmd);
 }
 
+
 #if SERVER_PROTOCOL_DEBUG
 int main(int argc, char* argv[]){
 

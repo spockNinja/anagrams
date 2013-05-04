@@ -1,7 +1,59 @@
 #include "server.h"
 #include "builder.h"
+#include "word_list.h"
 
 #define DEBUG 0
+
+
+#if DEBUG
+
+Player p[] = {
+    { 0, 0, "bob", 8081, 1, 1},
+    { 0, 1, "jill", 8082, 1, 1},
+    { 0, 1, "", 8082, 0, 1},
+    { 0, 1, "", 8082, 0, 1},
+    { 0, 1, "", 8082, 0, 1},
+    { 0, 1, "", 8082, 0, 1},
+    { 0, 1, "", 8082, 0, 1},
+    { 0, 1, "", 8082, 0, 1},
+    { 0, 1, "", 8082, 0, 1},
+    { 0, 1, "", 8082, 0, 1}
+};
+
+
+struct word_node base = {"llamas", "aallms", 6, NULL};
+
+
+
+
+struct word_node fours = {"mall", "allm", 4, NULL};
+
+struct word_node fivetemp1 = {"small", "aallms", 5, NULL};
+struct word_node fives = {"llama", "aallm", 5, &fivetemp1} ;
+
+struct word_set factors = {
+    NULL,
+    &fours,
+    &fives,
+    NULL,
+    NULL,
+    NULL
+};
+
+int usedwords[2] = {2, 3};
+
+Server_Info server_info = {
+    p,
+    "8080",
+    2,
+    20,
+    5,
+    usedwords,
+    &base,
+    &factors
+};
+
+#endif
 
 // character compare function
 // A helper function used by qsort that sorts each word
@@ -27,13 +79,46 @@ char* word_sort(const char* word){
 /**
 * checks if the given word is valid for this round
 */
-bool valid_word(const char* base_word, const char* test_word){
-	// FIXME: needs to be implemented.
-    char* b_word = word_sort(base_word);
-    char* t_word = word_sort(test_word);
-    if (strlen(t_word) > strlen(b_word)) return false;
+bool valid_word(const char* test_word){
 
-	return true;
+    bool is_valid = false;
+    char* t_word = word_sort(test_word);
+    int tw_len = strlen(t_word);
+    struct word_node* list = malloc( sizeof(struct word_node) );
+
+    switch(tw_len){
+        case 3:
+            list = server_info.base_word_factors->threes;
+            break;
+        case 4:
+            list = server_info.base_word_factors->fours;
+            break;
+        case 5:
+            list = server_info.base_word_factors->fives;
+            break;
+        case 6:
+            list = server_info.base_word_factors->sixes;
+            break;
+        case 7:
+            list = server_info.base_word_factors->sevens;
+            break;
+        case 8:
+            list = server_info.base_word_factors->eights;
+            break;
+        default:
+            list = NULL;
+    }
+
+    while(list != NULL){
+        if (DEBUG) printf("checking list word: %s\n", list->word);
+        int cmp = strcmp(list->word, test_word);
+        if (cmp == 0) is_valid = true;
+        list = list->next;
+    }
+
+    free(t_word);
+    free(list);
+	return is_valid;
 }
 
 
@@ -88,31 +173,28 @@ int word_value(char* word){
 }
 
 
-/**
-* adds the given score to the current player p's score
-*/
-void update_score(Player* p, int score){
-	p->points += score;
-	// FIXME: do what's needed to update the client
-}
 
 #if DEBUG
 /**
  * test function for this module
  */
 int main(int argc, char* argv[]){
-    char* b_word = "llamas";
+    char* b_word = server_info.base_word->word;
 
-    char* test_1 = "pie"; // not in b_word
-    char* test_2 = "small"; // in b_word
+    char* test_1 = "llsm"; // not in b_word
+    char* test_2 = "mall";  // in b_word
+    char* test_3 = "small"; // in b_word
 
     printf("%s -> %s\n", b_word, word_sort(b_word));
 
     printf("%s -> %s, %s\n", test_1, word_sort(test_1),
-        valid_word(b_word, test_1) ? "true" : "false");
-
+            valid_word(test_1) ? "true" : "false");
+    
     printf("%s -> %s, %s\n", test_2, word_sort(test_2),
-            valid_word(b_word, test_2) ? "true" : "false");
+            valid_word(test_2) ? "true" : "false");
+
+    printf("%s -> %s, %s\n", test_3, word_sort(test_2),
+            valid_word(test_3) ? "true" : "false");
 
 }
 #endif
