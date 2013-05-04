@@ -171,7 +171,15 @@ int word_value(char* word){
 			break;
 	}
 
-    
+    char* lccs = server_info.rare_chars;
+    for (int i = 0; i < word_length; i++){
+        for (int j = 0; j < strlen(lccs); j++){
+           if (word[i] == lccs[j]) score += 5;        
+        }
+    }
+
+    if (word_length == server_info.base_word->len) score += 100;
+
 	return score;
 }
 
