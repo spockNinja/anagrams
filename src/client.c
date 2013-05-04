@@ -1,4 +1,5 @@
 #define _BSD_SOURCE
+#define _GNU_SOURCE
 #define _XOPEN_SOURCE
 
 #include <unistd.h>
@@ -22,7 +23,7 @@
 
 const char LOCALHOST[] = "127.0.0.1";
 
-FILE* client_stream;
+int client;
 
 WINDOW *round_info;
 WINDOW *rankings;
@@ -43,6 +44,7 @@ struct word_node* history_next = NULL;
 
 // The word that the user is in the process of building
 char current_word[9];
+char cmd_buffer[128];
 
 static void quit();
 static void init_windows();
@@ -73,12 +75,11 @@ int main(int argc, char* argv[]){
     };
 
     // create a socket for the client
-    int client = socket(AF_INET, SOCK_STREAM, 0);
+    client = socket(AF_INET, SOCK_STREAM, 0);
     if (client == -1) {
         perror("Can't create client socket");
         exit(EXIT_FAILURE);
     }
-    client_stream = fdopen(client, "rw");
 
     // name the socket
     struct sockaddr_in address;
@@ -118,9 +119,14 @@ int main(int argc, char* argv[]){
         }
         else {
             if (FD_ISSET(client, &testfds)) {
-                char *cmd;
-                fscanf(client_stream, "%s;", &cmd);
-                parse_server_command(cmd);
+                int read = recv(client, cmd_buffer, sizeof cmd_buffer, 0);
+                int consumed = 0;
+                char *buf = cmd_buffer;
+                while (consumed < read) {
+                    consumed += strlen(buf) + 1;
+                    parse_server_command(buf);
+                    buf += consumed;
+                }
             }
             if (FD_ISSET(STDIN_FILENO, &testfds)) {
                 process_user_input(getch());
@@ -235,10 +241,29 @@ static void process_user_input(int ch) {
 }
 
 static void parse_server_command(char* cmd) {
+    int code;
+    char* message;
+
+    sscanf(cmd, "%c%s;", &code, &message);
+
+    switch(code) {
+        case 't':
+            // update time
+            break;
+        case 'n':
+            //
+            break;
+        case '&':
+            ring_bell();
+        default:
+            break;
+    }
 }
 
 static void send_word(char *word) {
-    fprintf(client_stream, "s%s;", word);
+    char *message;
+    asprintf(&message, "w%s;", word);
+    write(client, message, strlen(message)+1);
 }
 
 static void ring_bell() {
