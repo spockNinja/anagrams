@@ -25,7 +25,7 @@
 // default number of rounds to be played
 #define def_rounds 5
 
-
+//Player datatype
 typedef struct {
 	int points;		// current tally of the player's points
 	int color;		// 0-9 preset colors
@@ -35,6 +35,7 @@ typedef struct {
 	bool ready;		// whether or not the client is ready for a round
 } Player;
 
+//Server_Info datatype
 typedef struct {
 	Player players[max_users];	// an array of all current players in the game
 	char* port;                 // the communications port used for client-server comm.
