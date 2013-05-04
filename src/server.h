@@ -45,7 +45,7 @@ typedef struct {
 	int* used_words;                    // int array containing indeces of words used as base_words
 	struct word_node* base_word;        // the word from which all others can be made *changes each round*
 	struct word_set* base_word_factors; // the words which can be made from base_word *changes each round*
-    char* least_common_characters;      // used for bonus
+    char* rare_chars;      // used for bonus
 } Server_Info;
 
 // A set of linked lists, one for each possible word length
