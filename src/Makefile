@@ -11,6 +11,7 @@ debug: $(D_BINS)
 
 clean:
 	rm $(OBJS)
+	rm $(BINS)
 
 d_clean:
 	rm $(D_BINS)
