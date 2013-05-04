@@ -175,3 +175,8 @@ void generate_game_words(Server_Info* server, struct word_node* list_head) {
         current_node = current_node->next;
     }
 }
+
+char* get_rare_chars(const char* base){
+
+    return "";
+}

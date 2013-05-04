@@ -50,7 +50,8 @@ Server_Info server_info = {
     5,
     usedwords,
     &base,
-    &factors
+    &factors,
+    "ms"
 };
 
 #endif
@@ -169,6 +170,8 @@ int word_value(char* word){
 			score = 95;
 			break;
 	}
+
+    
 	return score;
 }
 
