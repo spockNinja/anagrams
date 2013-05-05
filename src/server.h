@@ -32,6 +32,7 @@
 //Player datatype
 typedef struct {
 	int points;		// current tally of the player's points
+    int bonus_points; // number of points gained only through bonuses
 	int color;		// 0-9 preset colors, also works as their index
 	char* username; // hurr durr, this is the username
 	int portnumber;	// the port over whhich the user is communicating

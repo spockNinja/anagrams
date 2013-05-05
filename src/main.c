@@ -55,6 +55,7 @@ int main (int argc, char* argv[]) {
     
     // initialize null player
     null_player.points = 0;
+    null_player.bonus_points = 0;
     null_player.color = 0;
     null_player.username = "";
     null_player.portnumber = 0;
