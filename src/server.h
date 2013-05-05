@@ -17,6 +17,7 @@
 #include <pthread.h>
 #include "colors.h"
 #include "server_protocol.h"
+#include "timer.h"
 
 
 //external port we listen on

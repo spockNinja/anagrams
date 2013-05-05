@@ -3,4 +3,4 @@ struct targ {
     int interval;
 };
 
-void timer(struct targ time_args);
+void timer(void *t_args);

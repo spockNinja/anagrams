@@ -116,7 +116,13 @@ int start_server()
 	tv.tv_sec = 30;
 	tv.tv_usec = 0;
 	pthread_t timethread;
-	if(pthread_create(&timethread, NULL, timer, ));
+    struct targ time_arg;
+    time_arg.t = &tv;
+    time_arg.interval = 1;
+	if(pthread_create(&timethread, NULL, timer, &time_arg) != 0)
+	{
+	    perror("cannot create thread");
+	}
 	
 	for(;;) {
         read_fds = server_info.current_users; // copy it

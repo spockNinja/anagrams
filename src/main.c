@@ -3,8 +3,6 @@
 #include "word_list.h"
 #include "connect.h"
 #include "logic.h"
-#include "timer.h"
-
 
 // Resets server data for each round
 void reset_server_info(Server_Info* server) {

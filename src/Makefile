@@ -17,7 +17,7 @@ d_clean:
 	rm $(D_BINS)
 
 server: $(SERVER_BINS)
-	$(CC) $(SERVER_BINS) -o server
+	$(CC) $(SERVER_BINS) -lpthread -o server
 
 client: client.c word_list.o
 	$(CC) client.c -lpanel -lncurses word_list.o -o client
