@@ -37,6 +37,7 @@ char* update_score(unsigned int player_index, unsigned int score){
 
 char* update_bword(char* bword){
     char* cmd;
+    // FIXME: include a '.' character in front of the bonus character
     asprintf(&cmd, "b%s;\n", bword);
     return cmd;
 }
