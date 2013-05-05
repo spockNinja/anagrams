@@ -1,4 +1,4 @@
-#include "server_protocol.h"
+#include "server.h"
 
 #define SERVER_PROTOCOL_DEBUG 0
 
@@ -8,10 +8,11 @@ void message_clients(const char* command){
     return;
 #endif
 
-    int fdmax = 0;
+    printf("%s", "Trying to send message.\n");
     for (int i = 0; i < server_info.num_players; i++){
-        if(FD_ISSET(i, server_info.current_users)) {
-            if (send(i, command, strlen(command)+1, 0) == -1)
+        if(FD_ISSET(server_info.players[i].portnumber, server_info.current_users)) {
+            printf("FDSET for %i\n", i);
+            if (send(server_info.players[i].portnumber, command, strlen(command)+1, 0) == -1)
                 fprintf(stderr, "message failure to fd#%i, message: %s\n", i, command);
         }
     }

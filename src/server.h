@@ -15,6 +15,7 @@
 #include <netdb.h>
 #include <time.h>
 #include "colors.h"
+#include "server_protocol.h"
 
 
 //external port we listen on

@@ -1,5 +1,3 @@
-#include "server.h"
-
 void message_clients(const char* command);
 
 char* update_time(char* time_string);
