@@ -27,9 +27,8 @@ int get_player_index(int port)
 //this gets passed a Server Info struct that is in the main program 
 //for general information, and passes back an fd_set for tnhe list
 //of all connected parties, hopefully to make later selects easier.
-int start_server(fd_set *current_users)
+int start_server()
 {
-	fd_set master = (*current_users);    // master file descriptor list
     fd_set read_fds;  // temp file descriptor list for select()
     int biggest_fd;   // largest file descriptor number 
 
@@ -48,7 +47,7 @@ int start_server(fd_set *current_users)
 
     struct addrinfo hints, *ai, *p;
 
-    FD_ZERO(&master);    // clear the master and temp sets
+    FD_ZERO(&server_info.current_users);    // clear the master and temp sets
     FD_ZERO(&read_fds);
 
     // get us a socket and bind it
@@ -95,7 +94,7 @@ int start_server(fd_set *current_users)
     }
 
     // add the listener to the master set
-    FD_SET(listener, &master);
+    FD_SET(listener, &server_info.current_users);
 
     // keep track of the biggest file descriptor
     biggest_fd = listener; // so far, it's this one
@@ -105,7 +104,7 @@ int start_server(fd_set *current_users)
 	tv.tv_usec = 0;
 	
 	for(;;) {
-        read_fds = master; // copy it
+        read_fds = (*server_info.current_users); // copy it
 		printf("the time starting left is %i seconds.\n", (int)tv.tv_sec );
 		select_result = select(biggest_fd+1, &read_fds, NULL, NULL, &tv);
         if (select_result == -1) {
@@ -128,7 +127,7 @@ int start_server(fd_set *current_users)
 	                    if (newfd == -1) {
 	                        perror("accept");
 	                    } else {
-	                        FD_SET(newfd, &master); // add to master set
+	                        FD_SET(newfd, &server_info.current_users); // add to master set
 	                        if (newfd > biggest_fd) {    // keep track of the max
 	                            biggest_fd = newfd;
 	                        }
@@ -175,7 +174,7 @@ int start_server(fd_set *current_users)
 	                            perror("recv");
 	                        }
 	                        close(i); // bye!
-	                        FD_CLR(i, &master); // remove from master set
+	                        FD_CLR(i, &server_info.current_users); // remove from master set
 	                	}
 	                	//they didn't disconnect
 	                	else
@@ -203,6 +202,6 @@ int start_server(fd_set *current_users)
     } // END for(;;)--and you thought it would never end!
 
 	printf("Done looking for users (30 seconds elapsed)\n");
-
+    
 	return 0;
 }
