@@ -90,6 +90,7 @@ void pick_word(struct word_node* list_head) {
                         used = true;
                         break;
                     }
+                    next_word = next_word->next;
                 }
 
                 if (!used) {
