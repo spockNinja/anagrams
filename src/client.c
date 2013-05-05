@@ -241,10 +241,10 @@ static void process_user_input(int ch) {
 }
 
 static void parse_server_command(char* cmd) {
-    int code;
+    char code;
     char* message;
 
-    sscanf(cmd, "%c%s;", &code, &message);
+    sscanf(cmd, "%c%s;", &code, message);
 
     switch(code) {
         case 't':
