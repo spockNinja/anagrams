@@ -143,6 +143,7 @@ int start_server()
 	                            server_info.num_players++;
 	                            Player new_player;
 	                            new_player.portnumber = newfd;
+                                    printf("stupid port... %i\n", newfd);
 	                            new_player.connected = true;
 	                            new_player.points = 0;
 	                            for(int j = 1; j<=max_users;j++)

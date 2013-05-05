@@ -8,11 +8,8 @@ void message_clients(const char* command){
     return;
 #endif
 
-    printf("%s", "Trying to send message.\n");
-    for (int i = 0; i < server_info.num_players; i++){
-        printf("checking if FDSET for %i\n", server_info.players[i].portnumber);
-        if(FD_ISSET(server_info.players[i].portnumber, server_info.current_users)) {
-            printf("FDSET for %i\n", i);
+    for (int i = 0; i <= server_info.num_players; i++){
+        if(FD_ISSET(server_info.players[i].portnumber, &(server_info.current_users))) {
             if (send(server_info.players[i].portnumber, command, strlen(command)+1, 0) == -1)
                 fprintf(stderr, "message failure to fd#%i, message: %s\n", i, command);
         }
