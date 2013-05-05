@@ -2,7 +2,7 @@ CC=c99
 BINS=server client
 OBJS=main.o builder.o accept.o word_list.o
 D_BINS=debug_server debug_client d_main.o d_builder.o d_accept.o d_connect.o d_word_list.o
-SERVER_BINS=main.o builder.o connect.o accept.o word_list.o
+SERVER_BINS=main.o builder.o connect.o accept.o word_list.o server_protocol.o
 D_SERVER_BINS=d_main.o d_builder.o d_accept.o d_connect.o d_word_list.o
 
 all: $(BINS) $(OBJS)
@@ -36,6 +36,9 @@ accept.o: accept.c
 
 connect.o: connect.c
 	$(CC) -c connect.c
+	
+server_protocol.o: server_protocol.c
+	$(CC) -c server_protocol.c
 
 debug_server: d_builder.o d_accept.o d_connect.o d_word_list.o d_main.o
 	$(CC) -g -o debug_server d_builder.o d_accept.o d_connect.o d_word_list.o d_main.o
