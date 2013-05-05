@@ -3,7 +3,6 @@
 
 #include "server.h"
 #include "builder.h"
-#include "word_list.h"
 
 // A helper function used by qsort that sorts each word
 // see qsort documentation if you're curious

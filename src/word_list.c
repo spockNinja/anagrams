@@ -1,7 +1,6 @@
 // This file encapsulates all logic for manipulating linked word lists
 
 #include "server.h"
-#include "word_list.h"
 
 // A helper function to create and initialise a new word_node
 struct word_node* create_node(char* word, char* sorted_word, int len) {
@@ -26,3 +25,11 @@ void free_list(struct word_node* head) {
     }
 }
 
+int count_words(struct word_node* head){
+    int count = 0;
+    while (head != NULL){
+        count = count+1;
+        head = head->next;
+    }
+    return count;
+}

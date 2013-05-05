@@ -41,6 +41,18 @@ char* update_bword(char* bword){
     return cmd;
 }
 
+char* update_skeleton(struct word_set* base_word_factors){
+    char* cmd;
+    asprintf(&cmd, "l3:%i,4:%i,5:%i,6:%i,7:%i,8:%i;",
+            count_words(base_word_factors->threes),
+            count_words(base_word_factors->fours),
+            count_words(base_word_factors->fives),
+            count_words(base_word_factors->sixes),
+            count_words(base_word_factors->sevens),
+            count_words(base_word_factors->eights));
+    return cmd;
+}
+
 
 #if SERVER_PROTOCOL_DEBUG
 int main(int argc, char* argv[]){

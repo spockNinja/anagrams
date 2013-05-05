@@ -18,6 +18,7 @@
 #include "colors.h"
 #include "server_protocol.h"
 #include "timer.h"
+#include "word_list.h"
 
 
 //external port we listen on

@@ -11,3 +11,5 @@ struct word_node {
 void free_list(struct word_node* head);
 
 struct word_node* create_node(char* word, char* sorted_word, int len);
+
+int count_words(struct word_node* head);

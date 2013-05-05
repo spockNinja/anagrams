@@ -1,6 +1,5 @@
 #include "server.h"
 #include "builder.h"
-#include "word_list.h"
 #include "connect.h"
 #include "logic.h"
 
