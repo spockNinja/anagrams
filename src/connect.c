@@ -127,7 +127,7 @@ int start_server()
 	for(;;) {
         read_fds = server_info.current_users; // copy it
 		printf("the time starting left is %i seconds.\n", (int)tv.tv_sec );
-		select_result = select(biggest_fd+1, &read_fds, NULL, NULL, NULL);
+		select_result = select(biggest_fd+1, &read_fds, NULL, NULL, tv);
         if (select_result == -1) {
             perror("select");
             exit(4);

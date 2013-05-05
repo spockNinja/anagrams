@@ -6,6 +6,10 @@
 
 int start_game()
 {
+    //before the game actually starts, send data they need
+    message_clients(update_bword(server_info.base_word->sorted_word));
+    message_clients(update_skeleton(server_info.base_word_factors));
+    
     fd_set read_fds;  // temp file descriptor list for select()
     int biggest_fd = get_biggest_player_fd();   // largest file descriptor number 
     int select_result = 0;
@@ -20,14 +24,23 @@ int start_game()
     char remoteIP[INET6_ADDRSTRLEN];
 
 	struct timeval tv;
-	tv.tv_sec = 30;
+	tv.tv_sec = 300;
 	tv.tv_usec = 0;
 	int listener = server_info.listen_fd;
-	
+
+	pthread_t timethread;
+    struct targ time_arg;
+    time_arg.t = &tv;
+    time_arg.interval = 1;
+	if(pthread_create(&timethread, NULL, timer, &time_arg) != 0)
+	{
+	    perror("cannot create thread");
+	}
+
 	for(;;) {
         
         read_fds = server_info.current_users; // copy it
-		select_result = select(biggest_fd+1, &read_fds, NULL, NULL, NULL);
+		select_result = select(biggest_fd+1, &read_fds, NULL, NULL, &tv);
         if (select_result == -1) {
             perror("select");
             exit(4);
