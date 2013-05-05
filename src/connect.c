@@ -22,6 +22,17 @@ int get_player_index(int port)
         if(server_info.players[i].portnumber == port)
             return i;
     }
+    return -1;
+}
+
+int get_biggest_player_fd()
+{
+    int biggest = 0;
+    for(int i = 0; i<=server_info.num_players;i++)
+    {
+        biggest = server_info.players[i].portnumber > biggest ? server_info.players[i].portnumber : biggest;
+    }
+    return biggest;
 }
 
 //this gets passed a Server Info struct that is in the main program 
@@ -88,20 +99,21 @@ int start_server()
 
     freeaddrinfo(ai); // all done with this
 
-    // listen
     if (listen(listener, 10) == -1) {
+    // listen
         perror("listen");
         exit(3);
     }
 
     // add the listener to the master set
     FD_SET(listener, &server_info.current_users);
-
+    
+    server_info.listen_fd = listener;
     // keep track of the biggest file descriptor
     biggest_fd = listener; // so far, it's this one
 	int select_result = 0;
 	struct timeval tv;
-	tv.tv_sec = 30;
+	tv.tv_sec = 10;
 	tv.tv_usec = 0;
 	
 	for(;;) {
@@ -129,10 +141,6 @@ int start_server()
 	                    if (newfd == -1) {
 	                        perror("accept");
 	                    } else {
-	                        FD_SET(newfd, &server_info.current_users); // add to master set
-	                        if (newfd > biggest_fd) {    // keep track of the max
-	                            biggest_fd = newfd;
-	                        }
 	                        printf("selectserver: new connection from %s on "
 	                            "socket %d\n", inet_ntop(remoteaddr.ss_family,
 	                                           get_in_addr((struct sockaddr*)&remoteaddr),
@@ -155,11 +163,18 @@ int start_server()
 	                                    break;
 	                                }       
 	                            }
+	                            FD_SET(newfd, &server_info.current_users); // add to master set
+	                            if (newfd > biggest_fd) {    // keep track of the max
+	                                biggest_fd = newfd;
+	                            }
 	                        }
 	                        else
 	                        {
 	                            printf("connection on socket %d refused\n", newfd);
 	                            //write to the port that they're too late   
+	                            char *tempstr = "You were too late! There are already ten people connected.\nGoodbye!\n";
+	                            write(newfd, tempstr, strlen(tempstr)+1);
+	                            close(newfd);
 	                        }
 	                            
 	                    }
@@ -183,14 +198,15 @@ int start_server()
 	                	else
 	                	{
 	                	    char tempbuf[nbytes];
-                            if(buf[0] == 'n')
+                            if(buf[0] == 'w')
                             {
                                 for(int j=1; j<nbytes; j++)
                                 {
                                     tempbuf[j-1] = buf[j];
                                 }
                                 tempbuf[nbytes] = '\0';
-                                printf("port %i is now named: %s\n", i, tempbuf);
+                                printf("they sent: %s\n", i, tempbuf);
+                                
                             }
 	                	} 
 	                } // END handle data from client
