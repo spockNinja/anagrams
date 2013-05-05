@@ -15,6 +15,15 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
+int get_player_index(int port)
+{
+    for(int i = 0; i<server_info.num_players;i++)
+    {
+        if(server_info.players[i].portnumber == port)
+            return i;
+    }
+}
+
 //this gets passed a Server Info struct that is in the main program 
 //for general information, and passes back an fd_set for tnhe list
 //of all connected parties, hopefully to make later selects easier.
@@ -135,7 +144,7 @@ int start_server(fd_set *current_users)
 	                            new_player.portnumber = newfd;
 	                            new_player.connected = true;
 	                            new_player.points = 0;
-	                            for(int j = 0; j<server_info.num_players;j++)
+	                            for(int j = 1; j<=max_users;j++)
 	                            {
 	                                if(server_info.players[j].portnumber == null_player.portnumber)
 	                                {
@@ -159,19 +168,28 @@ int start_server(fd_set *current_users)
 	                        if (nbytes == 0) {
 	                            // connection closed
 	                            printf("selectserver: socket %d hung up\n", i);
-	                            for(int j = 0; j<server_info.num_players; j++)
-	                            {
-	                                if(server_info.players[j].portnumber == i)
-	                                {
-	                                    server_info.players[j] = null_player;
-	                                    server_info.num_players--;
-	                                }
+	                            server_info.players[get_player_index(i)] = null_player;
+	                            server_info.num_players--;
 	                            }
-	                        } else {
+	                        else {
 	                            perror("recv");
 	                        }
 	                        close(i); // bye!
 	                        FD_CLR(i, &master); // remove from master set
+	                	}
+	                	//they didn't disconnect
+	                	else
+	                	{
+	                	    char tempbuf[nbytes];
+                            if(buf[0] == 'n')
+                            {
+                                for(int j=1; j<nbytes; j++)
+                                {
+                                    tempbuf[j-1] = buf[j];
+                                }
+                                tempbuf[nbytes] = '\0';
+                                printf("port %i is now named: %s\n", i, tempbuf);
+                            }
 	                	} 
 	                } // END handle data from client
 	            } // END got new incoming connection
@@ -179,6 +197,7 @@ int start_server(fd_set *current_users)
 		} // END else if for if this is a thing
 		else
 		{
+		    // the select timed out
 			break;
 		}
     } // END for(;;)--and you thought it would never end!

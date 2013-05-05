@@ -67,7 +67,7 @@ int main (int argc, char* argv[]) {
     // initialise server variables
     server_info.num_players = 0;
     server_info.total_words = 0;
-    for(int i = 0; i<max_users; i++)
+    for(int i = 0; i<=max_users; i++)
         server_info.players[i] = null_player;
     server_info.used_words = NULL;
     server_info.base_word_factors = malloc(sizeof(struct word_set));
