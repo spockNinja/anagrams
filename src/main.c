@@ -3,8 +3,8 @@
 #include "connect.h"
 #include "logic.h"
 
-// Resets server data for each round
-void reset_server_info(Server_Info* server) {
+// Resets server words for each round
+void reset_words(Server_Info* server) {
     free_list(server->base_word_factors->threes);
     free_list(server->base_word_factors->fours);
     free_list(server->base_word_factors->fives);
@@ -85,10 +85,11 @@ int main (int argc, char* argv[]) {
     int round;
     srand(time(0) + getpid());
     for (round=0; round < server_info.num_rounds; round++) {
-        reset_server_info(&server_info);
+        reset_words(&server_info);
         pick_word(list_head);
         generate_game_words(list_head);
         server_info.rare_chars = get_rare_chars(server_info.base_word->sorted_word);
+        printf("The word for round %d is: %s", round, server_info.base_word->word);
         start_game();
     }
 }
