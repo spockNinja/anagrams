@@ -35,6 +35,13 @@ char* update_score(unsigned int player_index, unsigned int score){
     return cmd;
 }
 
+char* update_bword(char* bword){
+
+    char* cmd;
+    asprintf(&cmd, "b%s;\n", bword);
+    return cmd;
+}
+
 
 #if SERVER_PROTOCOL_DEBUG
 int main(int argc, char* argv[]){
@@ -44,6 +51,12 @@ int main(int argc, char* argv[]){
     message_clients(update_score(1, 9000));
 
     message_clients(update_name(3, "Billy"));
+
+
+    for(;;){
+
+
+    }
 
 }
 #endif
