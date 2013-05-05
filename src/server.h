@@ -14,6 +14,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <time.h>
+#include <pthread.h>
 #include "colors.h"
 #include "server_protocol.h"
 

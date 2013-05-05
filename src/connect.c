@@ -113,13 +113,14 @@ int start_server()
     biggest_fd = listener; // so far, it's this one
 	int select_result = 0;
 	struct timeval tv;
-	tv.tv_sec = 10;
+	tv.tv_sec = 30;
 	tv.tv_usec = 0;
+	pthread_t timethread;
+	if(pthread_create(&timethread, NULL, timer, ));
 	
 	for(;;) {
         read_fds = server_info.current_users; // copy it
 		printf("the time starting left is %i seconds.\n", (int)tv.tv_sec );
-                message_clients(update_time("5:00"));
 		select_result = select(biggest_fd+1, &read_fds, NULL, NULL, NULL);
         if (select_result == -1) {
             perror("select");
@@ -205,7 +206,7 @@ int start_server()
                                     tempbuf[j-1] = buf[j];
                                 }
                                 tempbuf[nbytes] = '\0';
-                                printf("they sent: %s\n", i, tempbuf);
+                                printf("they(%d) sent: %s\n", i, tempbuf);
                                 
                             }
 	                	} 
