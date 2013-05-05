@@ -82,6 +82,8 @@ int main (int argc, char* argv[]) {
 
     FD_ZERO(&current_users);
 
+    server_info.current_users = &current_users;
+
     start_server(&current_users);
 
     // once players are connected, play through all the rounds
