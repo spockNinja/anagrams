@@ -69,7 +69,7 @@ int main (int argc, char* argv[]) {
     server_info.total_words = 0;
     for(int i = 0; i<max_users; i++)
         server_info.players[i] = null_player;
-    server_info.used_words = calloc(server_info.num_rounds, sizeof(int));
+    server_info.used_words = NULL;
     server_info.base_word_factors = malloc(sizeof(struct word_set));
     server_info.base_word_factors->threes = NULL;
     server_info.base_word_factors->fours = NULL;
@@ -78,7 +78,7 @@ int main (int argc, char* argv[]) {
     server_info.base_word_factors->sevens = NULL;
     server_info.base_word_factors->eights = NULL;
 
-    struct word_node* list_head = read_list(&server_info, word_list);
+    struct word_node* list_head = read_list(word_list);
 
     FD_ZERO(&current_users);
 
@@ -89,8 +89,8 @@ int main (int argc, char* argv[]) {
     srand(time(0) + getpid());
     for (round=0; round < server_info.num_rounds; round++) {
         reset_server_info(&server_info);
-        pick_word(&server_info, list_head);
-        generate_game_words(&server_info, list_head);
+        pick_word(list_head);
+        generate_game_words(list_head);
         server_info.rare_chars = get_rare_chars(server_info.base_word->sorted_word);
     }
 }

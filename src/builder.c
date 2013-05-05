@@ -17,7 +17,7 @@ int sort_word(const void* word1, const void* word2) {
 
 // Reads every word in a file (each word on a line)
 // and stores the normal list in orig_list while storing a parallel list of sorted words in sort_list
-struct word_node* read_list(Server_Info* server, FILE* word_list) {
+struct word_node* read_list(FILE* word_list) {
 
     struct word_node* previous_node = NULL;
     struct word_node* current_node = NULL;
@@ -58,7 +58,7 @@ struct word_node* read_list(Server_Info* server, FILE* word_list) {
             // move to the next node
             previous_node = current_node;
             current_node = current_node->next;
-            server->total_words++;
+            server_info.total_words++;
         }
     }
 
@@ -66,13 +66,13 @@ struct word_node* read_list(Server_Info* server, FILE* word_list) {
 }
 
 // picks a random word from the word list (length of MAX_WORD_SIZE) to use as the base_word
-void pick_word(Server_Info* server, struct word_node* list_head) {
+void pick_word(struct word_node* list_head) {
     bool found = false;
     struct word_node* current_node = list_head;
 
     while(!found) {
         // pick a random spot in the list to start
-        int i = rand() % server->total_words;
+        int i = rand() % server_info.total_words;
 
         // get to that part of the list
         int j;
@@ -83,21 +83,19 @@ void pick_word(Server_Info* server, struct word_node* list_head) {
         // pick the closest valid word
         while(current_node != NULL) {
             if (current_node->len == MAX_WORD_SIZE) {
-                int k;
                 bool used = false;
-                for(k=0; k < server->num_rounds; k++) {
-                    if (server->used_words[k] == i) {
+                struct word_node* next_word = server_info.used_words;
+                while (next_word != NULL) {
+                    if (strcmp(next_word->word, current_node->word) == 0) {
                         used = true;
-                        break;
-                    }
-                    else if (server->used_words[k] == 0) {
                         break;
                     }
                 }
 
                 if (!used) {
-                    server->base_word = create_node(current_node->word, current_node->sorted_word, current_node->len);
-                    server->used_words[j] = i;
+                    // Use create_node so that no chains are broken
+                    server_info.base_word = create_node(current_node->word, current_node->sorted_word, current_node->len);
+                    next_word = create_node(current_node->word, current_node->sorted_word, current_node->len);
                     return;
                 }
             }
@@ -107,7 +105,7 @@ void pick_word(Server_Info* server, struct word_node* list_head) {
 }
 
 // generates a list of words based on the chosen base_word
-void generate_game_words(Server_Info* server, struct word_node* list_head) {
+void generate_game_words(struct word_node* list_head) {
     int words_found = 0;
     struct word_node* current_node = list_head;
 
@@ -115,14 +113,14 @@ void generate_game_words(Server_Info* server, struct word_node* list_head) {
         int base_letter = 0;
         int comp_letter = 0;
         // check each letter
-        while (current_node->sorted_word[comp_letter] != '\0' && server->base_word->sorted_word[base_letter] != '\0') {
+        while (current_node->sorted_word[comp_letter] != '\0' && server_info.base_word->sorted_word[base_letter] != '\0') {
             // if they are equal, continue
-            if (current_node->sorted_word[comp_letter] == server->base_word->sorted_word[base_letter]) {
+            if (current_node->sorted_word[comp_letter] == server_info.base_word->sorted_word[base_letter]) {
                 comp_letter++;
                 base_letter++;
             }
             // if root letter is lower, increment
-            else if(server->base_word->sorted_word[base_letter] < current_node->sorted_word[comp_letter]) {
+            else if(server_info.base_word->sorted_word[base_letter] < current_node->sorted_word[comp_letter]) {
                 base_letter++;
             }
             // not a match, break out
@@ -136,29 +134,27 @@ void generate_game_words(Server_Info* server, struct word_node* list_head) {
             struct word_node* add_to_list;
             switch(current_node->len) {
                 case 3:
-                    add_to_list = server->base_word_factors->threes;
+                    add_to_list = server_info.base_word_factors->threes;
                     break;
                 case 4:
-                    add_to_list = server->base_word_factors->fours;
+                    add_to_list = server_info.base_word_factors->fours;
                     break;
                 case 5:
-                    add_to_list = server->base_word_factors->fives;
+                    add_to_list = server_info.base_word_factors->fives;
                     break;
                 case 6:
-                    add_to_list = server->base_word_factors->sixes;
+                    add_to_list = server_info.base_word_factors->sixes;
                     break;
                 case 7:
-                    add_to_list = server->base_word_factors->sevens;
+                    add_to_list = server_info.base_word_factors->sevens;
                     break;
                 case 8:
-                    add_to_list = server->base_word_factors->eights;
+                    add_to_list = server_info.base_word_factors->eights;
                     break;
             }
 
-            struct word_node* prev_node = NULL;
             // get to the end of the list
             while(add_to_list != NULL) {
-                prev_node = add_to_list;
                 add_to_list = add_to_list->next;
             }
 
@@ -166,10 +162,6 @@ void generate_game_words(Server_Info* server, struct word_node* list_head) {
             add_to_list = create_node(current_node->word, current_node->sorted_word, current_node->len);
             words_found++;
 
-            // keeping the list linked
-            if (prev_node != NULL) {
-                prev_node->next = add_to_list;
-            }
         }
 
         current_node = current_node->next;
