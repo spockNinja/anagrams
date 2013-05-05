@@ -8,3 +8,4 @@ char* update_score(unsigned int player_index, unsigned int score);
 
 char* update_bword(char* bword);
 
+char* update_skeleton(struct word_set* base_word_factors);
