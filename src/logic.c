@@ -49,38 +49,18 @@ int start_game()
 	                    if (newfd == -1) {
 	                        perror("accept");
 	                    } else {
-	                        FD_SET(newfd, &server_info.current_users); // add to master set
-	                        if (newfd > biggest_fd) {    // keep track of the max
-	                            biggest_fd = newfd;
-	                        }
 	                        printf("selectserver: new connection from %s on "
 	                            "socket %d\n", inet_ntop(remoteaddr.ss_family,
 	                                           get_in_addr((struct sockaddr*)&remoteaddr),
 	                                           remoteIP, INET6_ADDRSTRLEN),
     	                                       newfd);
 	                        
-	                        if(server_info.num_players+1 <= max_users){
-	                            server_info.num_players++;
-	                            Player new_player;
-	                            new_player.portnumber = newfd;
-                                    printf("stupid port... %i\n", newfd);
-	                            new_player.connected = true;
-	                            new_player.points = 0;
-	                            for(int j = 1; j<=max_users;j++)
-	                            {
-	                                if(server_info.players[j].portnumber == null_player.portnumber)
-	                                {
-	                                    new_player.color = j;
-	                                    server_info.players[j] = new_player;
-	                                    break;
-	                                }       
-	                            }
-	                        }
-	                        else
-	                        {
-	                            printf("connection on socket %d refused\n", newfd);
-	                            //write to the port that they're too late   
-	                        }
+                            printf("connection on socket %d refused\n", newfd);
+                            //write to the port that they're too late   
+                            char *tempstr = "You were too late! The game is in progress.\nGoodbye!\n";
+                            write(newfd, tempstr, strlen(tempstr)+1);
+                            close(newfd);   
+	                        
 	                            
 	                    }
 	                } else {
@@ -91,7 +71,7 @@ int start_game()
 	                        if (nbytes == 0) {
 	                            // connection closed
 	                            printf("selectserver: socket %d hung up\n", i);
-	                            server_info.players[get_player_index(i)] = null_player;
+	                            server_info.players[get_player_index(i)].connected = false;
 	                            server_info.num_players--;
 	                            }
 	                        else {
@@ -113,9 +93,17 @@ int start_game()
                             if(code == 'w')
                             {
                                 printf("%s sent the word: %s\n", server_info.players[cpi].username, message);
-                                
-                                write(i, "&\n" ,3);
+                                if(valid_word(message))
+                                {
+                                    server_info.players[cpi].points += word_value(message);
+                                    server_info.players[cpi].bonus_points += word_bonus(message);
+                                }
+                                else
+                                    write(i, "&;", 3);
                             }
+                            
+                            message = update_score(cpi, (server_info.players[cpi].points + server_info.players[cpi].bonus_points));
+                            message_clients(message);
                             
 	                	} 
 	                } // END handle data from client
