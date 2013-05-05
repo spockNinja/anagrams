@@ -29,7 +29,7 @@ int get_player_index(int port)
 //of all connected parties, hopefully to make later selects easier.
 int start_server(fd_set *current_users)
 {
-	fd_set master;    // master file descriptor list
+	fd_set master = (*current_users);    // master file descriptor list
     fd_set read_fds;  // temp file descriptor list for select()
     int biggest_fd;   // largest file descriptor number 
 
@@ -204,6 +204,5 @@ int start_server(fd_set *current_users)
 
 	printf("Done looking for users (30 seconds elapsed)\n");
 
-	(*current_users) = master;
 	return 0;
 }
