@@ -103,18 +103,20 @@ int start_game()
 	                	//they didn't disconnect
 	                	else
 	                	{
-	                	    char tempbuf[nbytes];
-                            if(buf[0] == 'n')
+	                	    //current player index
+	                	    int cpi = get_player_index(i);
+	                	    
+	                	    //parse client message
+	                	    char code;
+	                	    char* message;
+	                	    sscanf(buf, "%c%s;", &code, message);
+                            if(code == 'w')
                             {
-                                for(int j=1; j<nbytes; j++)
-                                {
-                                    tempbuf[j-1] = buf[j];
-                                }
-                                tempbuf[nbytes] = '\0';
-                                printf("port %i is now named: %s\n", i, tempbuf);
+                                printf("%s sent the word: %s\n", server_info.players[cpi].username, message);
+                                
+                                write(i, "&\n" ,3);
                             }
-                            printf("they pressed a button\n");
-                            write(i, "&\n" ,3);
+                            
 	                	} 
 	                } // END handle data from client
 	            } // END got new incoming connection
