@@ -1,7 +1,7 @@
 #include "server.h"
 
 #define SERVER_PROTOCOL_DEBUG 0
-
+ 
 void message_clients(const char* command){
 #if SERVER_PROTOCOL_DEBUG
     write( STDOUT_FILENO, command, strlen(command));
@@ -17,9 +17,9 @@ void message_clients(const char* command){
 
 }
 
-char* update_time(char* time_string){
+char* update_time(int seconds){
     char* cmd;
-    asprintf(&cmd, "t%s;\n", time_string); 
+    asprintf(&cmd, "t%i;\n", seconds); 
     return cmd;
 }
 
@@ -36,7 +36,6 @@ char* update_score(unsigned int player_index, unsigned int score){
 }
 
 char* update_bword(char* bword){
-
     char* cmd;
     asprintf(&cmd, "b%s;\n", bword);
     return cmd;
@@ -46,17 +45,17 @@ char* update_bword(char* bword){
 #if SERVER_PROTOCOL_DEBUG
 int main(int argc, char* argv[]){
 
-    message_clients(update_time("5:00"));
+    message_clients(update_time(300));
 
     message_clients(update_score(1, 9000));
 
     message_clients(update_name(3, "Billy"));
 
-
-    for(;;){
-
-
-    }
+    struct timeval* countdown;
+    countdown->tv_sec = 300; // 5 minutes
+    countdown->tv_usec = 0;
+    
+    timer(countdown, 1);
 
 }
 #endif

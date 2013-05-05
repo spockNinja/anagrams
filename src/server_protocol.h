@@ -1,6 +1,6 @@
 void message_clients(const char* command);
 
-char* update_time(char* time_string);
+char* update_time(int seconds);
 
 char* update_name(unsigned int player_index, char* player_name);
 
