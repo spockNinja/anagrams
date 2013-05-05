@@ -17,6 +17,7 @@
 #include <ncurses.h>
 #include <panel.h>
 #include "word_list.h"
+#include "colors.h"
 
 #define COLUMNS 80
 #define ROWS 25
@@ -51,7 +52,7 @@ static void init_windows();
 static void ring_bell();
 static void parse_server_command(char *cmd);
 static void process_user_input(int ch);
-static void send_word(char* word);
+static void send_message(char code, char* word);
 
 int main(int argc, char* argv[]){
     // The client will be dumb and single threaded.
@@ -93,6 +94,9 @@ int main(int argc, char* argv[]){
         perror("Can't connect to server");
         exit(EXIT_FAILURE);
     }
+
+    // tell the server what we want our username to be
+    send_message('n', USERNAME);
 
     // setup fd_set for select
     fd_set inputs;
@@ -164,7 +168,7 @@ static void process_user_input(int ch) {
                 history_head = history_next;
 
                 // send word to server
-                send_word(current_word);
+                send_message('w', current_word);
 
                 // reset word and clear the input area
                 memset(current_word, 0, len);
@@ -240,13 +244,37 @@ static void process_user_input(int ch) {
     }
 }
 
+static void update_base_word(char* wrd_cmd) {
+
+}
+
+static void update_user(char* usr_cmd) {
+    int player;
+    char* username = calloc(strlen(usr_cmd), 1);
+    sscanf(usr_cmd, "%i%s", &player, username);
+
+    wattron(rankings, COLOR_PAIR(player+1));
+    mvwaddstr(rankings, player, 1, username);
+    wrefresh(rankings);
+    wattroff(rankings, COLOR_PAIR(player+1));
+    wattron(rankings, COLOR_PAIR(1));
+
+    free(username);
+}
+
 static void parse_server_command(char* cmd) {
     char code;
-    char* message;
+    // know that it will never be longer than strlen(cmd)
+    char* message = calloc(strlen(cmd), 1);
 
-    sscanf(cmd, "%c%s;", &code, message);
+    sscanf(cmd, "%c%[^;]", &code, message);
 
     switch(code) {
+        case 'b':
+            // new base word
+            update_base_word(message);
+        case 'u':
+            update_user(message);
         case 't':
             // update time
             break;
@@ -258,11 +286,13 @@ static void parse_server_command(char* cmd) {
         default:
             break;
     }
+
+    free(message);
 }
 
-static void send_word(char *word) {
+static void send_message(char code, char *word) {
     char *message;
-    asprintf(&message, "w%s;", word);
+    asprintf(&message, "%c%s;", code, word);
     write(client, message, strlen(message)+1);
 }
 
@@ -338,6 +368,12 @@ static void init_windows() {
     box(puzzle_words, 0, 0);
     box(word_input, 0, 0);
     box(prompt, 0, 0);
+
+    // Initialize all color pairs for the possible players
+    int i;
+    for (i=1; i<11; i++) {
+        init_pair(i, color_pairs[i-1][1], color_pairs[i-1][0]);
+    }
 
     // Make sure the prompt and bell are hidden to start
     hide_panel(my_panels[4]);
