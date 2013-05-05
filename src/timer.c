@@ -10,7 +10,7 @@ void timer(void *t_args){
     while((time_args->t)->tv_sec > 0){
         sleep(time_args->interval);
         timersub(time_args->t, &decrement, time_args->t);
-        message_clients(update_time((int)decrement.tv_sec));
+        message_clients(update_time((int)((time_args->t)->tv_sec)));
     }
     
 }
