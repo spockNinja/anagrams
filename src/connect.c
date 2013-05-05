@@ -158,7 +158,7 @@ int start_server()
 	                            server_info.num_players++;
 	                            Player new_player;
 	                            new_player.portnumber = newfd;
-                                    printf("stupid port... %i\n", newfd);
+                                    //printf("stupid port... %i\n", newfd);
 	                            new_player.connected = true;
 	                            new_player.points = 0;
 	                            for(int j = 1; j<=max_users;j++)
@@ -205,15 +205,14 @@ int start_server()
 	                	else
 	                	{
 	                	    char tempbuf[nbytes];
-                            if(buf[0] == 'w')
+                            if(buf[0] == 'n')
                             {
                                 for(int j=1; j<nbytes; j++)
                                 {
                                     tempbuf[j-1] = buf[j];
                                 }
                                 tempbuf[nbytes] = '\0';
-                                printf("they(%d) sent: %s\n", i, tempbuf);
-                                
+                                printf("The user on fd(%d) changed their username to: %s\n", i, tempbuf);
                             }
 	                	} 
 	                } // END handle data from client
