@@ -50,6 +50,7 @@ int start_server()
     FD_ZERO(&server_info.current_users);    // clear the master and temp sets
     FD_ZERO(&read_fds);
 
+
     // get us a socket and bind it
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
@@ -104,7 +105,7 @@ int start_server()
 	tv.tv_usec = 0;
 	
 	for(;;) {
-        read_fds = (*server_info.current_users); // copy it
+        read_fds = server_info.current_users; // copy it
 		printf("the time starting left is %i seconds.\n", (int)tv.tv_sec );
                 message_clients(update_time("5:00"));
 		select_result = select(biggest_fd+1, &read_fds, NULL, NULL, NULL);

@@ -24,9 +24,6 @@ int main (int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    // do we need to set up initialize server_info here?
-
-    fd_set current_users;
     server_info.port = argv[1];
 
     if (argc >= 3) {
@@ -80,11 +77,9 @@ int main (int argc, char* argv[]) {
 
     struct word_node* list_head = read_list(word_list);
 
-    FD_ZERO(&current_users);
+    FD_ZERO(&(server_info.current_users));
 
-    server_info.current_users = &current_users;
-
-    start_server(&current_users);
+    start_server();
 
     // once players are connected, play through all the rounds
     int round;

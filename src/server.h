@@ -48,7 +48,7 @@ typedef struct {
 	struct word_node* base_word;        // the word from which all others can be made *changes each round*
 	struct word_set* base_word_factors; // the words which can be made from base_word *changes each round*
     char* rare_chars;      // used for bonus
-    fd_set* current_users;  // all user file descriptors
+    fd_set current_users;  // all user file descriptors
 } Server_Info;
 
 // A set of linked lists, one for each possible word length
