@@ -2,6 +2,7 @@
 #include "builder.h"
 #include "word_list.h"
 #include "connect.h"
+#include "logic.h"
 
 
 // Resets server data for each round
@@ -89,6 +90,7 @@ int main (int argc, char* argv[]) {
         pick_word(list_head);
         generate_game_words(list_head);
         server_info.rare_chars = get_rare_chars(server_info.base_word->sorted_word);
+        start_game();
     }
 }
 

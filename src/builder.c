@@ -189,14 +189,10 @@ char* get_rare_chars(const char* base){
                 break;
         }
         //result = (ccc < lcc ? &bc : ccc == lcc ? strcat(result, &bc):result);
-        if(ccc<lcc)
+        if(ccc<=lcc)
         {
             lcc = ccc;
             strcpy(result, bc);
-        }
-        else if(ccc == lcc)
-        {
-            strcpy(result, strcat(result, bc));
         }
     }
     return result;
