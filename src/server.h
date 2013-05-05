@@ -14,6 +14,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <time.h>
+#include "colors.h"
 
 
 //external port we listen on
@@ -57,6 +58,8 @@ struct word_set {
     struct word_node* sevens;
     struct word_node* eights;
 };
+
+
 
 
 Server_Info server_info; // global access for this instance
