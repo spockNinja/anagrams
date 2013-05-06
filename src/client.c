@@ -127,6 +127,12 @@ int main(int argc, char* argv[]){
                 int read = recv(client, cmd_buffer, sizeof cmd_buffer, 0);
                 int consumed = 0;
                 char *buf = cmd_buffer;
+                if (read == 0) {
+                    // server has disconnected
+                    endwin();
+                    fprintf(stderr, "%s", "The server has closed.\n");
+                    exit(EXIT_FAILURE);
+                }
                 while (consumed < read) {
                     consumed += strlen(buf) + 1;
                     parse_server_command(buf);
@@ -136,6 +142,13 @@ int main(int argc, char* argv[]){
             if (FD_ISSET(STDIN_FILENO, &testfds)) {
                 if (accept_user_input) {
                     process_user_input(getch());
+                }
+                else {
+                    // only accept the quit commands
+                    int in = getch();
+                    if (in == '\x03' || in == '\x11') {
+                        quit();
+                    }
                 }
             }
         }
@@ -322,6 +335,7 @@ static void update_score(char *cmd){
 }
 
 static void update_time(char *cmd){
+    mvwaddstr(round_info, 1, 75, "    ");
     mvwaddstr(round_info, 1, 75, cmd);
     wrefresh(round_info);
 }
@@ -336,14 +350,13 @@ static void parse_server_command(char* cmd) {
     // know that it will never be longer than strlen(cmd)
     char* message = calloc(strlen(cmd), 1);
 
-    sscanf(cmd, "%c%[^;]", &code, message);
+    sscanf(cmd, "%c%[^;^\n]", &code, message);
 
     switch(code) {
         case 'b':
             update_base_word(message);
             break;
         case 'l':
-            mvwaddstr(word_input, 1, 1, "Recieved word list.");
             update_word_list(message);
             break;
         case 'n':
@@ -351,6 +364,7 @@ static void parse_server_command(char* cmd) {
             break;
         case 'p':
             update_player_list(message);
+            accept_user_input = true;
             break;
         case 's':
             update_score(message);
@@ -359,7 +373,6 @@ static void parse_server_command(char* cmd) {
             break;
         case 'r':
             update_round_number(message);
-            accept_user_input = true;
             break;
         case '&':
             ring_bell();
