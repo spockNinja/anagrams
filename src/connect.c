@@ -203,17 +203,18 @@ int start_server()
 	                	//they didn't disconnect
 	                	else
 	                	{
-	                	    char tempbuf[nbytes];
-                            if(buf[0] == 'n')
+	                	    //current player index
+	                	    int cpi = get_player_index(i);
+	                	    buf[nbytes] = '\0';
+	                	    //parse client message
+	                	    char code;
+	                	    char* message = calloc(nbytes, sizeof(char));
+	                	    sscanf(buf, "%c%[^;]", &code, message);
+                            if(code == 'n')
                             {
-                                for(int j=1; j<nbytes; j++)
-                                {
-                                    tempbuf[j-1] = buf[j];
-                                }
-                                tempbuf[nbytes] = '\0';
-                                server_info.players[get_player_index(i)].username = calloc(strlen(tempbuf)+1, sizeof(char));
-                                strcpy(server_info.players[get_player_index(i)].username, tempbuf);
-                                printf("The user on fd(%d) at index %d changed their username to: %s\n", i, get_player_index(i), server_info.players[get_player_index(i)].username);
+                                server_info.players[cpi].username = calloc(nbytes, sizeof(char));
+                                strcpy(server_info.players[cpi].username, message);
+                                printf("User on fd(%d) at index %d changed their username to: %s\n", i, cpi, message);
                             }
 	                	} 
 	                } // END handle data from client

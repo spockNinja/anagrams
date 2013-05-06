@@ -103,7 +103,7 @@ int start_game()
 	                	    //parse client message
 	                	    char code;
 	                	    char* message = calloc(nbytes, sizeof(char));
-	                	    sscanf(buf, "%c%s;", &code, message);
+	                	    sscanf(buf, "%c%[^;]", &code, message);
                             if(code == 'w')
                             {
                                 printf("%s sent the word: %s\n", server_info.players[cpi].username, message);
