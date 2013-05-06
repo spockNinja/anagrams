@@ -15,6 +15,7 @@ int start_game()
     int biggest_fd = get_biggest_player_fd();   // largest file descriptor number 
     int select_result = 0;
     int newfd;        // newly accept()ed socket descriptor
+    int last_scorer;
     printf("the biggest fd is: %d\n", biggest_fd);
     struct sockaddr_storage remoteaddr; // client address
     socklen_t addrlen;
@@ -114,6 +115,7 @@ int start_game()
                                     server_info.players[cpi].bonus_points += word_bonus(message);
                                     message_clients(update_player_list());
                                     message_clients(update_slot(word_index, server_info.players[cpi].color, message));
+                                    last_scorer = cpi;
                                 }
                                 else
                                     write(i, "&;\n", 4);
@@ -126,6 +128,8 @@ int start_game()
 		else
 		{
 		    // the select timed out
+		    server_info.players[last_scorer].bonus_points += 50;
+		    message_clients(update_leaderboard());
 			break;
 		}
     } // END for(;;)--and you thought it would never end!
