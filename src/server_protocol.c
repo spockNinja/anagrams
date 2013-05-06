@@ -8,7 +8,7 @@ void message_clients(const char* command){
     return;
 #endif
 
-    for (int i = 0; i <= server_info.num_players; i++){
+    for (int i = 0; i <= max_users; i++){
         if(FD_ISSET(server_info.players[i].portnumber, &(server_info.current_users))) {
             if (send(server_info.players[i].portnumber, command, strlen(command)+1, 0) == -1)
                 fprintf(stderr, "message failure to fd#%i, message: %s\n", i, command);
@@ -52,7 +52,9 @@ char* player_data(Player p){
 char* update_player_list(){
     char* cmd; 
 
-    qsort(&server_info.players[1], max_users, sizeof (Player*), compar_player);
+    // printf("preparing to sort the players\n");
+    // qsort(&server_info.players[1], max_users, sizeof (Player*), compar_player);
+    // printf("sorted the players\n");
 
     asprintf(&cmd, "p%s%s%s%s%s%s%s%s%s%s;\n", 
            player_data(server_info.players[1]),
