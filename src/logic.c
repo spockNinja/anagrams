@@ -9,6 +9,7 @@ int start_game()
     //before the game actually starts, send data they need
     message_clients(update_bword(server_info.base_word->sorted_word));
     message_clients(update_skeleton(server_info.base_word_factors));
+    message_clients(update_player_list());
     
     fd_set read_fds;  // temp file descriptor list for select()
     int biggest_fd = get_biggest_player_fd();   // largest file descriptor number 

@@ -244,11 +244,11 @@ static void process_user_input(int ch) {
     }
 }
 
-static void update_base_word(char* wrd_cmd) {
+static void update_base_word(char* cmd) {
 
 }
 
-static void update_user(char* usr_cmd) {
+static void update_player_list(char* cmd) {
     int player;
     char* username = calloc(strlen(usr_cmd), 1);
     sscanf(usr_cmd, "%i%s", &player, username);
@@ -262,6 +262,14 @@ static void update_user(char* usr_cmd) {
     free(username);
 }
 
+static void update_time(char *cmd){
+
+}
+
+static void update_player_list(char *cmd){
+
+}
+
 static void parse_server_command(char* cmd) {
     char code;
     // know that it will never be longer than strlen(cmd)
@@ -273,13 +281,15 @@ static void parse_server_command(char* cmd) {
         case 'b':
             // new base word
             update_base_word(message);
-        case 'u':
-            update_user(message);
+        case 'p':
+            update_player_list(message);
         case 't':
             // update time
+            update_time(message);
             break;
-        case 'n':
-            //
+        case 'r':
+            // update round number
+            update_round_number(message);
             break;
         case '&':
             ring_bell();

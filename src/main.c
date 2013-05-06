@@ -84,7 +84,8 @@ int main (int argc, char* argv[]) {
     // once players are connected, play through all the rounds
     int round;
     srand(time(0) + getpid());
-    for (round=0; round < server_info.num_rounds; round++) {
+    for (round=1; round <= server_info.num_rounds; round++) {
+        message_clients(update_round_number(round));
         reset_words(&server_info);
         pick_word(list_head);
         generate_game_words(list_head);
