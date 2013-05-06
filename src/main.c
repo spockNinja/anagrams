@@ -94,9 +94,11 @@ int main (int argc, char* argv[]) {
     srand(time(0) + getpid());
     for (round=1; round <= server_info.num_rounds; round++) {
         message_clients(update_round_number(round));
-        reset_words(&server_info);
-        pick_word(list_head);
-        generate_game_words(list_head);
+        do {
+            reset_words(&server_info);
+            pick_word(list_head);
+        }
+        while(!generate_game_words(list_head));
         server_info.rare_char = get_rare_char(server_info.base_word->sorted_word);
         printf("The word for round %d is: %s\n", round, server_info.base_word->word);
         printf("With a rare character of: %c\n", server_info.rare_char);

@@ -98,8 +98,12 @@ void pick_word(struct word_node* list_head) {
 }
 
 // generates a list of words based on the chosen base_word
-void generate_game_words(struct word_node* list_head) {
+// returns true if the word set is a good fit
+// returns false if there are too few/ too many words
+bool generate_game_words(struct word_node* list_head) {
     int words_found = 0;
+    int biggest_tf_list = 0;
+    int biggest_o_list = 0;
     struct word_node* current_node = list_head;
 
     while (current_node != NULL) {
@@ -154,12 +158,21 @@ void generate_game_words(struct word_node* list_head) {
                     server_info.base_word_factors->eights = new_head;
                     break;
             }
+            int new_list_size = count_words(new_head);
+            if (current_node->len < 5 && new_list_size > biggest_tf_list) {
+                biggest_tf_list = new_list_size;
+            }
+            else if(current_node->len > 4 && new_list_size > biggest_o_list) {
+                biggest_o_list = new_list_size;
+            }
 
             words_found++;
         }
 
         current_node = current_node->next;
     }
+
+    return words_found >= MAX_PUZZLE_WORDS && biggest_tf_list <= MAX_3or4_SIZE && biggest_o_list <= MAX_others_SIZE;
 }
 
 char get_rare_char(const char* base){
