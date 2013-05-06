@@ -245,13 +245,35 @@ static void process_user_input(int ch) {
 }
 
 static void update_base_word(char* cmd) {
+    int x = 33;
+    int ch;
+    for (ch=0; ch < strlen(cmd); ch++) {
+        // if the char is supposed to be highlighted
+        if (cmd[ch] == '.') {
+            // user the reverse attribute and consume the '.'
+            mvwaddch(round_info, 1, x, cmd[ch+1] | A_REVERSE);
+            ch++;
+        }
+        else {
+            mvwaddch(round_info, 1, x, cmd[ch]);
+        }
+        x += 2;
+    }
+}
 
+static void update_word_list(char* cmd) {
+    char* buf = cmd;
+    int word_len;
+    int num_words;
+    while(sscanf(cmd, "%i:%i,", &word_len, &num_words) > 0) {
+        //do shits
+    }
 }
 
 static void update_player_list(char* cmd) {
     int player;
-    char* username = calloc(strlen(usr_cmd), 1);
-    sscanf(usr_cmd, "%i%s", &player, username);
+    char* username = calloc(strlen(cmd), 1);
+    sscanf(cmd, "%i%s", &player, username);
 
     wattron(rankings, COLOR_PAIR(player+1));
     mvwaddstr(rankings, player, 1, username);
@@ -266,7 +288,7 @@ static void update_time(char *cmd){
 
 }
 
-static void update_player_list(char *cmd){
+static void update_round_number(char *cmd){
 
 }
 
@@ -279,20 +301,23 @@ static void parse_server_command(char* cmd) {
 
     switch(code) {
         case 'b':
-            // new base word
             update_base_word(message);
+            break;
+        case 'l':
+            update_word_list(message);
+            break;
         case 'p':
             update_player_list(message);
+            break;
         case 't':
-            // update time
             update_time(message);
             break;
         case 'r':
-            // update round number
             update_round_number(message);
             break;
         case '&':
             ring_bell();
+            break;
         default:
             break;
     }
@@ -334,9 +359,9 @@ static void init_windows() {
     }
 
     // Create windows for each section of the screen
-    round_info = newwin(4, 80, 0, 0);
-    rankings = newwin(21, 20, 4, 60);
-    puzzle_words = newwin(18, 60, 4, 0);
+    round_info = newwin(3, 80, 0, 0);
+    rankings = newwin(22, 20, 3, 60);
+    puzzle_words = newwin(19, 60, 3, 0);
     word_input = newwin(3, 60, 22, 0);
     prompt = newwin(5, 35, 8, 20);
     bell = newwin(6, 13, 8, 30);
