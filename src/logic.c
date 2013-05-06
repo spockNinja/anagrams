@@ -107,11 +107,13 @@ int start_game()
                             if(code == 'w')
                             {
                                 printf("%s sent the word: %s\n", server_info.players[cpi].username, message);
-                                if(valid_word(message))
+                                int word_index = valid_word(message);
+                                if(word_index >= 0)
                                 {
                                     server_info.players[cpi].points += word_value(message);
                                     server_info.players[cpi].bonus_points += word_bonus(message);
                                     message_clients(update_score(cpi, (server_info.players[cpi].points + server_info.players[cpi].bonus_points)));
+                                    message_clients(update_slot(word_index, cpi, message));
                                 }
                                 else
                                     write(i, "&;\n", 4);

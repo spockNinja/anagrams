@@ -31,9 +31,8 @@ char* word_sort(const char* word){
 /**
 * checks if the given word is valid for this round
 */
-bool valid_word(const char* test_word){
+int valid_word(const char* test_word){
 
-    bool is_valid = false;
     char* t_word = word_sort(test_word);
     int tw_len = strlen(t_word);
     struct word_node* list = malloc( sizeof(struct word_node) );
@@ -69,25 +68,25 @@ bool valid_word(const char* test_word){
         used_list = used_list->next;
     }
 
-
-
+    int place = 0;
     while(list != NULL){
         if (DEBUG) printf("checking list word: %s\n", list->word);
         int cmp = strcmp(list->word, test_word);
         if (cmp == 0){
-            is_valid = true;
             // add it to used_word_factors
             struct word_node* used_factor = create_node(test_word,(char*) word_sort(test_word), (int)strlen(test_word));
             used_factor->next = server_info.used_word_factors;
             server_info.used_word_factors = used_factor;
+            return place;
         }
         list = list->next;
+        place++;
     }
 
 
     free(t_word);
     free(list);
-	return is_valid;
+	return -1;
 }
 
 
