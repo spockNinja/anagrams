@@ -11,6 +11,12 @@ void reset_words(Server_Info* server) {
     free_list(server->base_word_factors->sixes);
     free_list(server->base_word_factors->sevens);
     free_list(server->base_word_factors->eights);
+    server_info.base_word_factors->threes = NULL;
+    server_info.base_word_factors->fours = NULL;
+    server_info.base_word_factors->fives = NULL;
+    server_info.base_word_factors->sixes = NULL;
+    server_info.base_word_factors->sevens = NULL;
+    server_info.base_word_factors->eights = NULL;
 }
 
 // The main server method

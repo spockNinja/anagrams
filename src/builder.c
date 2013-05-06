@@ -18,7 +18,6 @@ int sort_word(const void* word1, const void* word2) {
 // and stores the normal list in orig_list while storing a parallel list of sorted words in sort_list
 struct word_node* read_list(FILE* word_list) {
 
-    struct word_node* previous_node = NULL;
     struct word_node* current_node = NULL;
     struct word_node* head_node = NULL;
     char current_word[30];
@@ -44,19 +43,9 @@ struct word_node* read_list(FILE* word_list) {
 
             // create the new node
             current_node = create_node(current_word, current_word_sorted, word_size);
+            current_node->next = head_node;
+            head_node = current_node;
 
-            // remember the head node to send back to main
-            if (head_node == NULL) {
-                head_node = current_node;
-            }
-            // keep the list linked even though we are using malloc
-            if (previous_node != NULL) {
-                previous_node->next = current_node;
-            }
-
-            // move to the next node
-            previous_node = current_node;
-            current_node = current_node->next;
             server_info.total_words++;
         }
     }
@@ -131,37 +120,38 @@ void generate_game_words(struct word_node* list_head) {
 
         // add the word if it fits
         if (current_node->sorted_word[comp_letter] == '\0') {
-            struct word_node* add_to_list;
+            // copy the node *can't use the same pointer because it will mess up the source list*
+            // adding to the head to make it faster and more clear
+            struct word_node* new_head = create_node(current_node->word, current_node->sorted_word, current_node->len);
+
             switch(current_node->len) {
                 case 3:
-                    add_to_list = server_info.base_word_factors->threes;
+                    new_head->next = server_info.base_word_factors->threes;
+                    server_info.base_word_factors->threes = new_head;
                     break;
                 case 4:
-                    add_to_list = server_info.base_word_factors->fours;
+                    new_head->next = server_info.base_word_factors->fours;
+                    server_info.base_word_factors->fours = new_head;
                     break;
                 case 5:
-                    add_to_list = server_info.base_word_factors->fives;
+                    new_head->next = server_info.base_word_factors->fives;
+                    server_info.base_word_factors->fives = new_head;
                     break;
                 case 6:
-                    add_to_list = server_info.base_word_factors->sixes;
+                    new_head->next = server_info.base_word_factors->sixes;
+                    server_info.base_word_factors->sixes = new_head;
                     break;
                 case 7:
-                    add_to_list = server_info.base_word_factors->sevens;
+                    new_head->next = server_info.base_word_factors->sevens;
+                    server_info.base_word_factors->sevens = new_head;
                     break;
                 case 8:
-                    add_to_list = server_info.base_word_factors->eights;
+                    new_head->next = server_info.base_word_factors->eights;
+                    server_info.base_word_factors->eights = new_head;
                     break;
             }
 
-            // get to the end of the list
-            while(add_to_list != NULL) {
-                add_to_list = add_to_list->next;
-            }
-
-            // copy the node *can't use the same pointer because it will mess up the source list*
-            add_to_list = create_node(current_node->word, current_node->sorted_word, current_node->len);
             words_found++;
-
         }
 
         current_node = current_node->next;
