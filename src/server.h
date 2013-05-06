@@ -21,7 +21,6 @@
 #include "server_protocol.h"
 #include "timer.h"
 
-
 //external port we listen on
 //#define ext_port "9876"
 

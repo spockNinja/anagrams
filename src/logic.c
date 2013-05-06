@@ -3,16 +3,20 @@
  * come up within the setting of one round
  */
 #include "server.h"
+#include "accept.h"
+#include "connect.h"
 
 void finish_puzzle(){
 
-struct word_node* list = server_info.all_word_factors;
+struct word_node* list = malloc( sizeof(struct word_node) );
+list = server_info.all_word_factors;
 
 int j;
 while (list != NULL){
     j = valid_word(list->word);
     if(j>=0){
-        message_clients(update_slot(j, 0, list->word));
+        printf("trying to send word %s\n", list->word);
+        //message_clients(update_slot(j, 0, list->word));
     }
     list = list->next;
 }
@@ -49,7 +53,7 @@ int start_game()
     struct targ time_arg;
     time_arg.t = &tv;
     time_arg.interval = 30;
-	if(pthread_create(&timethread, NULL, timer, &time_arg) != 0)
+	if(pthread_create(&timethread, NULL, (void*) &timer, &time_arg) != 0)
 	{
 	    perror("cannot create thread");
 	}
