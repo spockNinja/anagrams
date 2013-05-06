@@ -35,6 +35,46 @@ char* update_score(unsigned int player_index, unsigned int score){
     return cmd;
 }
 
+int compar_player(const void* player1, const void* player2){
+    Player* p1 = (Player*) player1;
+    Player* p2 = (Player*) player2;
+    return p1->points > p2->points ? 1 : p1->points == p2->points ? 0 : -1;
+}
+
+char* player_data(Player p){
+    char* cmd;
+    if(p.portnumber == null_player.portnumber) return "";
+    
+    asprintf(&cmd, "%i:%s", p.color, p.username);
+    return cmd;
+}
+
+char* update_player_list(){
+    char* cmd; 
+
+    qsort(&server_info.players[1], max_users, sizeof (Player*), compar_player);
+
+    asprintf(&cmd, "p%s%s%s%s%s%s%s%s%s%s;\n", 
+           player_data(server_info.players[1]),
+           player_data(server_info.players[2]),
+           player_data(server_info.players[3]),
+           player_data(server_info.players[4]),
+           player_data(server_info.players[5]),
+           player_data(server_info.players[6]),
+           player_data(server_info.players[7]),
+           player_data(server_info.players[8]),
+           player_data(server_info.players[9]),
+           player_data(server_info.players[10])
+           );
+    return cmd;
+}
+
+char* update_round_number(int num){
+    char* cmd;
+    asprintf(&cmd, "r%i;\n", num);
+    return cmd;
+}
+
 char* update_slot(int slot_index, int player_index, char* word){
     char* cmd;
     int word_length = strlen(word);
