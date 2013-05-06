@@ -36,6 +36,10 @@ struct word_node* read_list(FILE* word_list) {
         }
         // only include the word if it is the right size
         if (word_size >= MIN_WORD_SIZE && word_size <= MAX_WORD_SIZE) {
+            // capitalize the word
+            int i;
+            for(i=0; i < word_size; i++)
+                current_word[i] = toupper(current_word[i]);
             // copy and sort the word
             char current_word_sorted[30];
             strcpy(current_word_sorted, current_word);
