@@ -55,7 +55,7 @@ char* update_player_list(){
     char* cmd; 
 
     // printf("preparing to sort the players\n");
-    // qsort(&server_info.players[1], max_users, sizeof (Player*), compar_player);
+    //qsort(&server_info.players[1], max_users, sizeof (Player*), compar_player);
     // printf("sorted the players\n");
     
     printf("building player list string\n");

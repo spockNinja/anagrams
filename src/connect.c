@@ -35,6 +35,27 @@ int get_biggest_player_fd()
     return biggest;
 }
 
+char *check_name(char* test_name)
+{
+    char* temp_name = calloc(strlen(test_name)+1, sizeof(char));
+    strcpy(temp_name, test_name);
+    int num_same = 0;
+    for(int i = 0; i<=server_info.num_players;i++)
+    {
+        if(server_info.players[i].username != null_player.username && 
+           strcmp(server_info.players[i].username, temp_name) == 0)
+        {
+            num_same++;
+            printf("above asprintf\n");
+            asprintf(&temp_name, "%s%d", test_name, num_same);
+            printf("checking new name: %s\n", temp_name);
+            i = 0;
+        }
+        printf("finished with index %d\n", i);
+    }
+    return temp_name;    
+}
+
 //this gets passed a Server Info struct that is in the main program 
 //for general information, and passes back an fd_set for tnhe list
 //of all connected parties, hopefully to make later selects easier.
@@ -119,6 +140,7 @@ int start_server()
     struct targ time_arg;
     time_arg.t = &tv;
     time_arg.interval = 1;
+    
 	if(pthread_create(&timethread, NULL,(void*) &timer, &time_arg) != 0)
 	{
 	    perror("cannot create thread");
@@ -160,6 +182,7 @@ int start_server()
 	                            new_player.portnumber = newfd;
 	                            new_player.connected = true;
 	                            new_player.points = 0;
+	                            new_player.username = "\0";
 	                            for(int j = 1; j<=max_users;j++)
 	                            {
 	                                if(server_info.players[j].portnumber == null_player.portnumber)
@@ -208,13 +231,16 @@ int start_server()
 	                	    buf[nbytes] = '\0';
 	                	    //parse client message
 	                	    char code;
-	                	    char* message = calloc(nbytes, sizeof(char));
+	                	    char* message = calloc(nbytes*2, sizeof(char));
 	                	    sscanf(buf, "%c%[^;]", &code, message);
                             if(code == 'n')
                             {
                                 server_info.players[cpi].username = calloc(nbytes, sizeof(char));
+                                message = check_name(message);
                                 strcpy(server_info.players[cpi].username, message);
                                 printf("User on fd(%d) at index %d changed their username to: %s\n", i, cpi, message);
+                                message = update_name(cpi, message);
+                                write(i, message, strlen(message)+1);
                             }
 	                	} 
 	                } // END handle data from client

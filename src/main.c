@@ -17,6 +17,7 @@ void reset_words(Server_Info* server) {
     server_info.base_word_factors->sixes = NULL;
     server_info.base_word_factors->sevens = NULL;
     server_info.base_word_factors->eights = NULL;
+    server_info.used_word_factors = NULL;
 }
 
 // The main server method
@@ -98,7 +99,7 @@ int main (int argc, char* argv[]) {
         server_info.rare_char = get_rare_char(server_info.base_word->sorted_word);
         printf("The word for round %d is: %s\n", round, server_info.base_word->word);
         printf("With a rare character of: %c\n", server_info.rare_char);
-       start_game();
+        start_game();
     }
 }
 
