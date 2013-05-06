@@ -158,12 +158,10 @@ bool generate_game_words(struct word_node* list_head) {
                     server_info.base_word_factors->eights = new_head;
                     break;
             }
-<<<<<<< HEAD
             
             struct word_node* new_head_two = create_node(current_node->word, current_node->sorted_word, current_node->len);
             new_head_two->next = server_info.all_word_factors;
             server_info.all_word_factors = new_head_two;
-=======
             int new_list_size = count_words(new_head);
             if (current_node->len < 5 && new_list_size > biggest_tf_list) {
                 biggest_tf_list = new_list_size;
@@ -171,7 +169,6 @@ bool generate_game_words(struct word_node* list_head) {
             else if(current_node->len > 4 && new_list_size > biggest_o_list) {
                 biggest_o_list = new_list_size;
             }
->>>>>>> 7eefbe7ec17fde5d94833aeb02dc032612e27870
 
             words_found++;
         }
