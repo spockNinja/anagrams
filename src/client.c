@@ -48,6 +48,8 @@ struct word_node* history_next = NULL;
 // The word that the user is in the process of building
 char current_word[9];
 char cmd_buffer[128];
+int my_player_num;
+int columns[6];
 
 static void quit();
 static void init_windows();
@@ -55,7 +57,7 @@ static void ring_bell();
 static void parse_server_command(char *cmd);
 static void process_user_input(int ch);
 static void send_message(char code, char* word);
-static void show_prompt(char* message);
+static void fill_prompt(char* l1, char* l2, char* l3);
 
 int main(int argc, char* argv[]){
     // The client will be dumb and single threaded.
@@ -262,18 +264,11 @@ static void process_user_input(int ch) {
     }
 }
 
-static void show_prompt(char* message){
-    mvwaddstr(prompt, 3, 1, " Press anything else to dismiss.");
+static void fill_prompt(char* line1, char* line2, char* line3){
+    mvwaddstr(prompt, 1, 2, line1);
+    mvwaddstr(prompt, 2, 2, line2);
+    mvwaddstr(prompt, 3, 2, line3);
     wrefresh(prompt);
-
-    top_panel(my_panels[0]);
-
-    update_panels();
-    doupdate();
-    usleep(100000);
-    hide_panel(my_panels[0]);
-    update_panels();
-    doupdate();
 }
 
 static void update_base_word(char* cmd) {
@@ -300,6 +295,11 @@ static void update_base_word(char* cmd) {
 }
 
 static void update_word_list(char* cmd) {
+    // clear the window
+    werase(puzzle_words);
+    box(puzzle_words, 0, 0);
+
+    // process cmd
     int word_len;
     int num_words;
     int column = 2;
@@ -308,6 +308,7 @@ static void update_word_list(char* cmd) {
     while(sscanf(cmd, "%i:%i,%n", &word_len, &num_words, &offset) > 0) {
         int i;
         int j;
+        columns[word_len-3] = column;
         for(i=0; i <= num_words; i++) {
             if (!wrapped && i > MAX_WORD_LIST) {
                 column += (word_len + 2);
@@ -324,6 +325,60 @@ static void update_word_list(char* cmd) {
 }
 
 static void tell_username(char* cmd) {
+    int player_num;
+    char* username = calloc(strlen(cmd), 1);
+    sscanf(cmd, "%i,%s", &player_num, username);
+
+    my_player_num = player_num;
+
+    char *usr_msg;
+    asprintf(&usr_msg, "Your username is %s", username);
+    fill_prompt(usr_msg,
+                "Click anything to make",
+                "this prompt go away.");
+
+    top_panel(my_panels[0]);
+    update_panels();
+    doupdate();
+
+    getch();
+
+    hide_panel(my_panels[0]);
+    update_panels();
+    doupdate();
+}
+
+static void update_word(char* cmd) {
+    int player_num;
+    int word_index;
+    int word_len;
+    char* word = calloc(strlen(cmd), 1);
+    sscanf(cmd, "%i-%i,%i%s", &word_len, &word_index, &player_num, word);
+
+    int y = (word_index % MAX_WORD_LIST)+1;
+    int x = columns[word_len-3];
+    if (word_index > MAX_WORD_LIST) {
+        x += (word_len+2);
+    }
+
+    int cmd_ch;
+    int word_ch = 0;
+    for (cmd_ch=0; cmd_ch < strlen(word); cmd_ch++) {
+        // if the char is supposed to be highlighted
+        wattron(puzzle_words, COLOR_PAIR(player_num+1));
+        if (word[cmd_ch] == '.') {
+            // user the reverse attribute and consume the '.'
+            mvwaddch(puzzle_words, y, x, word[cmd_ch+1] | A_REVERSE);
+            cmd_ch++;
+        }
+        else {
+            mvwaddch(puzzle_words, y, x, word[cmd_ch]);
+        }
+        wattroff(puzzle_words, COLOR_PAIR(player_num+1));
+        x++;
+        word_ch++;
+    }
+    wrefresh(puzzle_words);
 }
 
 static void update_player_list(char* cmd) {
@@ -375,11 +430,14 @@ static void parse_server_command(char* cmd) {
         case 'p':
             update_player_list(message);
             break;
+        case 'r':
+            update_round_number(message);
+            break;
         case 't':
             update_time(message);
             break;
-        case 'r':
-            update_round_number(message);
+        case 'w':
+            update_word(message);
             break;
         case '&':
             ring_bell();
@@ -431,11 +489,6 @@ static void init_windows() {
     word_input = newwin(3, 60, 22, 0);
     prompt = newwin(5, 35, 8, 20);
     bell = newwin(6, 13, 8, 30);
-    // Prompt
-    mvwaddstr(prompt, 1, 1, " Are your sure you want to quit?");
-    mvwaddstr(prompt, 2, 1, " Press y or Y to confirm.");
-    mvwaddstr(prompt, 3, 1, " Press anything else to dismiss.");
-    wrefresh(prompt);
 
     // Bell
     mvwaddstr(bell, 0, 4, "_(#)_");
@@ -492,6 +545,10 @@ static void init_windows() {
 
 static void quit()
 {
+    fill_prompt("Are your sure you want to quit?",
+                "Press y or Y to confirm.",
+                "Press anything else to dismiss.");
+
     top_panel(my_panels[0]);
     update_panels();
     doupdate();
