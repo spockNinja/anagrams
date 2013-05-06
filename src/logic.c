@@ -99,12 +99,10 @@ int start_game()
 	                	    //current player index
 	                	    int cpi = get_player_index(i);
 	                	    buf[nbytes] = '\0';
-	                	    printf("message from client is : %s\n", buf);
 	                	    //parse client message
 	                	    char code;
-	                	    char* message;
+	                	    char* message = calloc(nbytes, sizeof(char));
 	                	    sscanf(buf, "%c%s;", &code, message);
-	                	    printf("sscanf determined the message was: %s\n", message);
                             if(code == 'w')
                             {
                                 printf("%s sent the word: %s\n", server_info.players[cpi].username, message);

@@ -90,6 +90,7 @@ int main (int argc, char* argv[]) {
         generate_game_words(list_head);
         server_info.rare_chars = get_rare_chars(server_info.base_word->sorted_word);
         printf("The word for round %d is: %s\n", round, server_info.base_word->word);
+        printf("With a rare character of: %s\n", server_info.rare_chars);
         start_game();
     }
 }
