@@ -15,10 +15,10 @@
 #include <netdb.h>
 #include <time.h>
 #include <pthread.h>
+#include "word_list.h"
 #include "colors.h"
 #include "server_protocol.h"
 #include "timer.h"
-#include "word_list.h"
 
 
 //external port we listen on
@@ -55,16 +55,6 @@ typedef struct {
     fd_set current_users;  // all user file descriptors
     int listen_fd;         // this is here to keep the listener listening
 } Server_Info;
-
-// A set of linked lists, one for each possible word length
-struct word_set {
-    struct word_node* threes;
-    struct word_node* fours;
-    struct word_node* fives;
-    struct word_node* sixes;
-    struct word_node* sevens;
-    struct word_node* eights;
-};
 
 
 
