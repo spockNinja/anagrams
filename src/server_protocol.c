@@ -23,13 +23,13 @@ char* update_time(int seconds){
     return cmd;
 }
 
-char* update_name(unsigned int player_index, char* player_name){
+char* update_name(int player_index, char* player_name){
     char* cmd;
     asprintf(&cmd, "n%u,%s;\n", player_index, player_name);
     return cmd;
 }
 
-char* update_score(unsigned int player_index, unsigned int score){
+char* update_score(int player_index, unsigned int score){
     char* cmd;
     asprintf(&cmd, "s%u,%u;\n", player_index, score);
     return cmd;

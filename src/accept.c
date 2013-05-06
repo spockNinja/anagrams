@@ -37,6 +37,7 @@ bool valid_word(const char* test_word){
     char* t_word = word_sort(test_word);
     int tw_len = strlen(t_word);
     struct word_node* list = malloc( sizeof(struct word_node) );
+    struct word_node* used_list = malloc( sizeof(struct word_node) );
 
     switch(tw_len){
         case 3:
@@ -61,12 +62,28 @@ bool valid_word(const char* test_word){
             list = NULL;
     }
 
+    used_list = server_info.used_word_factors;
+    while (used_list != NULL){
+        int cmp = strcmp(used_list->word, test_word);
+        if (cmp == 0) return false;
+        used_list = used_list->next;
+    }
+
+
+
     while(list != NULL){
         if (DEBUG) printf("checking list word: %s\n", list->word);
         int cmp = strcmp(list->word, test_word);
-        if (cmp == 0) is_valid = true;
+        if (cmp == 0){
+            is_valid = true;
+            // add it to used_word_factors
+            struct word_node* used_factor = create_node(test_word,(char*) word_sort(test_word), (int)strlen(test_word));
+            used_factor->next = server_info.used_word_factors;
+            server_info.used_word_factors = used_factor;
+        }
         list = list->next;
     }
+
 
     free(t_word);
     free(list);

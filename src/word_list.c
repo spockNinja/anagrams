@@ -3,7 +3,7 @@
 #include "server.h"
 
 // A helper function to create and initialise a new word_node
-struct word_node* create_node(char* word, char* sorted_word, int len) {
+struct word_node* create_node(const char* word, const char* sorted_word, int len) {
     struct word_node* new_node = (struct word_node*) malloc(sizeof(struct word_node));
     new_node->word = malloc(sizeof(char) * (len+1));
     new_node->sorted_word = malloc(sizeof(char) * (len+1));

@@ -6,9 +6,9 @@ char* update_round_number(int num);
 
 char* update_slot(int slot_index, int player_index, char* word);
 
-char* update_name(unsigned int player_index, char* player_name);
+char* update_name(int player_index, char* player_name);
 
-char* update_score(unsigned int player_index, unsigned int score);
+char* update_score(int player_index, unsigned int score);
 
 char* update_slot(int slot_index, int player_index, char* word);
 
