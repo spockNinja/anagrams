@@ -95,10 +95,10 @@ bool valid_word(const char* test_word){
 * Returns the number of base points the given word is worth.
 * Assumes that the given word is valid.
 */
-int word_value(char* word){
+unsigned int word_value(char* word){
 
 	int word_length = strlen(word);
-	int score = 0;
+	unsigned int score = 0;
 
 	switch(word_length){
 		case 2:
@@ -146,9 +146,9 @@ int word_value(char* word){
 * Returns the number of bonus points the given word is worth.
 * Assumes that the given word is valid.
 */
-int word_bonus(char* word){
+unsigned int word_bonus(char* word){
 
-    int score = 0;
+    unsigned int score = 0;
     int word_length = strlen(word);
     char lccs = server_info.rare_char;
     for (int i = 0; i < word_length; i++){
