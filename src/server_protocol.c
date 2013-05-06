@@ -166,7 +166,7 @@ char* update_bword(char* bword){
 
 char* update_skeleton(struct word_set* base_word_factors){
     char* cmd;
-    asprintf(&cmd, "l3:%i,4:%i,5:%i,6:%i,7:%i,8:%i;",
+    asprintf(&cmd, "l3:%i,4:%i,5:%i,6:%i,7:%i,8:%i;\n",
             count_words(base_word_factors->threes),
             count_words(base_word_factors->fours),
             count_words(base_word_factors->fives),

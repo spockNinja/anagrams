@@ -21,6 +21,7 @@
 
 #define COLUMNS 80
 #define ROWS 25
+#define MAX_WORD_LIST 19
 
 const char LOCALHOST[] = "127.0.0.1";
 
@@ -54,6 +55,7 @@ static void ring_bell();
 static void parse_server_command(char *cmd);
 static void process_user_input(int ch);
 static void send_message(char code, char* word);
+static void show_prompt(char* message);
 
 int main(int argc, char* argv[]){
     // The client will be dumb and single threaded.
@@ -260,6 +262,12 @@ static void process_user_input(int ch) {
     }
 }
 
+static void show_prompt(char* message){
+
+
+
+}
+
 static void update_base_word(char* cmd) {
     int x = 33;
     int cmd_ch;
@@ -286,17 +294,22 @@ static void update_base_word(char* cmd) {
 static void update_word_list(char* cmd) {
     int word_len;
     int num_words;
-    int column = 5;
+    int column = 2;
     int offset = 0;
+    bool wrapped = false;
     while(sscanf(cmd, "%i:%i,%n", &word_len, &num_words, &offset) > 0) {
         int i;
         int j;
-        for(i=1; i <= num_words; i++) {
+        for(i=0; i <= num_words; i++) {
+            if (!wrapped && i > MAX_WORD_LIST) {
+                column += (word_len + 2);
+                wrapped = true;
+            }
             for(j=0; j < word_len; j++) {
-                mvwaddch(puzzle_words, i, column+j, '_');
+                mvwaddch(puzzle_words, (i % MAX_WORD_LIST)+1, column+j, '_');
             }
         }
-        column += (j+3);
+        column += (word_len+2);
         cmd += offset;
     }
     wrefresh(puzzle_words);
@@ -307,31 +320,19 @@ static void tell_username(char* cmd) {
 
 static void update_player_list(char* cmd) {
     int player_num;
+    int score;
     char* username = calloc(strlen(cmd), 1);
     int offset = 0;
     int y = 1;
-    while(sscanf(cmd, "%i:%s,%n", &player_num, username, &offset) > 0) {
+    while(sscanf(cmd, "%i:%i:%[^,]%n", &player_num, &score, username, &offset) > 0) {
         wattron(rankings, COLOR_PAIR(player_num+1));
-        mvwaddstr(rankings, y, 1, username);
+        mvwprintw(rankings, y, 1, "%s %5d", username, score);
         wattroff(rankings, COLOR_PAIR(player_num+1));
         cmd += offset;
         y++;
     }
     wrefresh(rankings);
     free(username);
-}
-
-static void update_score(char *cmd){
-    int player;
-    char* score = calloc(strlen(cmd), 1);
-    sscanf(cmd, "%i:%s", &player, score);
-
-    wattron(rankings, COLOR_PAIR(player+1));
-    mvwaddstr(rankings, player, 15, score);
-    wattroff(rankings, COLOR_PAIR(player+1));
-
-    wrefresh(rankings);
-    free(score);
 }
 
 static void update_time(char *cmd){
@@ -355,6 +356,7 @@ static void parse_server_command(char* cmd) {
     switch(code) {
         case 'b':
             update_base_word(message);
+            accept_user_input = true;
             break;
         case 'l':
             update_word_list(message);
@@ -364,10 +366,7 @@ static void parse_server_command(char* cmd) {
             break;
         case 'p':
             update_player_list(message);
-            accept_user_input = true;
             break;
-        case 's':
-            update_score(message);
         case 't':
             update_time(message);
             break;
@@ -419,8 +418,8 @@ static void init_windows() {
 
     // Create windows for each section of the screen
     round_info = newwin(3, 80, 0, 0);
-    rankings = newwin(22, 20, 3, 60);
-    puzzle_words = newwin(19, 60, 3, 0);
+    rankings = newwin(23, 20, 2, 60);
+    puzzle_words = newwin(21, 60, 2, 0);
     word_input = newwin(3, 60, 22, 0);
     prompt = newwin(5, 35, 8, 20);
     bell = newwin(6, 13, 8, 30);
