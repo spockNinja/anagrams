@@ -37,6 +37,7 @@ PANEL *my_panels[6];
 
 //just a sample - will come from server
 char *round_letters = "BEEEILSV";
+bool accept_user_input = false;
 
 // The history linked list will have words added to the front
 // to make it easy to traverse in last-added order
@@ -133,7 +134,9 @@ int main(int argc, char* argv[]){
                 }
             }
             if (FD_ISSET(STDIN_FILENO, &testfds)) {
-                process_user_input(getch());
+                if (accept_user_input) {
+                    process_user_input(getch());
+                }
             }
         }
     }
@@ -246,50 +249,86 @@ static void process_user_input(int ch) {
 
 static void update_base_word(char* cmd) {
     int x = 33;
-    int ch;
-    for (ch=0; ch < strlen(cmd); ch++) {
+    int cmd_ch;
+    int rnd_word_ch = 0;
+    round_letters = calloc(strlen(cmd), 1);
+    for (cmd_ch=0; cmd_ch < strlen(cmd); cmd_ch++) {
         // if the char is supposed to be highlighted
-        if (cmd[ch] == '.') {
+        if (cmd[cmd_ch] == '.') {
             // user the reverse attribute and consume the '.'
-            mvwaddch(round_info, 1, x, cmd[ch+1] | A_REVERSE);
-            ch++;
+            mvwaddch(round_info, 1, x, cmd[cmd_ch+1] | A_REVERSE);
+            round_letters[rnd_word_ch] = cmd[cmd_ch+1];
+            cmd_ch++;
         }
         else {
-            mvwaddch(round_info, 1, x, cmd[ch]);
+            mvwaddch(round_info, 1, x, cmd[cmd_ch]);
+            round_letters[rnd_word_ch] = cmd[cmd_ch];
         }
         x += 2;
+        rnd_word_ch++;
     }
+    wrefresh(round_info);
 }
 
 static void update_word_list(char* cmd) {
-    char* buf = cmd;
     int word_len;
     int num_words;
-    while(sscanf(cmd, "%i:%i,", &word_len, &num_words) > 0) {
-        //do shits
+    int column = 5;
+    int offset = 0;
+    while(sscanf(cmd, "%i:%i,%n", &word_len, &num_words, &offset) > 0) {
+        int i;
+        int j;
+        for(i=1; i <= num_words; i++) {
+            for(j=0; j < word_len; j++) {
+                mvwaddch(puzzle_words, i, column+j, '_');
+            }
+        }
+        column += (j+3);
+        cmd += offset;
     }
+    wrefresh(puzzle_words);
+}
+
+static void tell_username(char* cmd) {
 }
 
 static void update_player_list(char* cmd) {
-    int player;
+    int player_num;
     char* username = calloc(strlen(cmd), 1);
-    sscanf(cmd, "%i%s", &player, username);
-
-    wattron(rankings, COLOR_PAIR(player+1));
-    mvwaddstr(rankings, player, 1, username);
+    int offset = 0;
+    int y = 1;
+    while(sscanf(cmd, "%i:%s,%n", &player_num, username, &offset) > 0) {
+        wattron(rankings, COLOR_PAIR(player_num+1));
+        mvwaddstr(rankings, y, 1, username);
+        wattroff(rankings, COLOR_PAIR(player_num+1));
+        cmd += offset;
+        y++;
+    }
     wrefresh(rankings);
-    wattroff(rankings, COLOR_PAIR(player+1));
-    wattron(rankings, COLOR_PAIR(1));
-
     free(username);
 }
 
-static void update_time(char *cmd){
+static void update_score(char *cmd){
+    int player;
+    char* score = calloc(strlen(cmd), 1);
+    sscanf(cmd, "%i:%s", &player, score);
 
+    wattron(rankings, COLOR_PAIR(player+1));
+    mvwaddstr(rankings, player, 15, score);
+    wattroff(rankings, COLOR_PAIR(player+1));
+
+    wrefresh(rankings);
+    free(score);
+}
+
+static void update_time(char *cmd){
+    mvwaddstr(round_info, 1, 75, cmd);
+    wrefresh(round_info);
 }
 
 static void update_round_number(char *cmd){
-
+    mvwaddstr(round_info, 1, 9, cmd);
+    wrefresh(round_info);
 }
 
 static void parse_server_command(char* cmd) {
@@ -304,16 +343,23 @@ static void parse_server_command(char* cmd) {
             update_base_word(message);
             break;
         case 'l':
+            mvwaddstr(word_input, 1, 1, "Recieved word list.");
             update_word_list(message);
+            break;
+        case 'n':
+            tell_username(message);
             break;
         case 'p':
             update_player_list(message);
             break;
+        case 's':
+            update_score(message);
         case 't':
             update_time(message);
             break;
         case 'r':
             update_round_number(message);
+            accept_user_input = true;
             break;
         case '&':
             ring_bell();
@@ -384,8 +430,8 @@ static void init_windows() {
     wrefresh(bell);
 
     // Round Header
-    mvwaddstr(round_info, 1, 1, "Round:");
-    mvwaddstr(round_info, 1, 65, "Time Remaining:");
+    mvwaddstr(round_info, 1, 2, "Round:");
+    mvwaddstr(round_info, 1, 55, "Time Remaining:");
     wrefresh(round_info);
 
     // Attach overlapping windows to panels
