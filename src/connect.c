@@ -182,6 +182,7 @@ int start_server()
 	                            new_player.portnumber = newfd;
 	                            new_player.connected = true;
 	                            new_player.points = 0;
+	                            new_player.bonus_points = 0;
 	                            new_player.username = "\0";
 	                            for(int j = 1; j<=max_users;j++)
 	                            {
