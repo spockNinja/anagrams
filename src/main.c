@@ -63,7 +63,7 @@ int main (int argc, char* argv[]) {
     null_player.bonus_points = 0;
     null_player.color = 0;
     null_player.username = "";
-    null_player.portnumber = 0;
+    null_player.portnumber = -1;
     null_player.connected = false;
     null_player.ready = false;
     
