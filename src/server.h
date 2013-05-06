@@ -31,6 +31,8 @@
 // default number of rounds to be played
 #define def_rounds 5
 
+#define max_base_word_length 8
+
 //Player datatype
 typedef struct {
 	unsigned int points;		// current tally of the player's points

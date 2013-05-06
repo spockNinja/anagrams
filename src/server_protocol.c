@@ -89,6 +89,9 @@ char* update_slot(int slot_index, int player_index, char* word){
         raw_cmd[j] = word[i];
         j = j+1;
     }
+    if (word_length == max_base_word_length){
+        raw_cmd[j] = '*';
+    }
 
     asprintf(&cmd, "w%i,%i%s;\n", slot_index, player_index, raw_cmd);
     free(raw_cmd);
