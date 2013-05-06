@@ -38,7 +38,7 @@ char* update_score(int player_index, unsigned int score){
 int compar_player(const void* player1, const void* player2){
     Player* p1 = (Player*) player1;
     Player* p2 = (Player*) player2;
-    return p1->points > p2->points ? 1 : p1->points == p2->points ? 0 : -1;
+    return p1->points < p2->points ? 1 : p1->points == p2->points ? 0 : -1;
 }
 
 char* player_data(int player_index){
@@ -55,7 +55,7 @@ char* update_player_list(){
     char* cmd; 
 
     // printf("preparing to sort the players\n");
-    //qsort(&server_info.players[1], max_users, sizeof (Player*), compar_player);
+    qsort(&server_info.players[1], server_info.num_players, sizeof (Player), compar_player);
     // printf("sorted the players\n");
     
     printf("building player list string\n");

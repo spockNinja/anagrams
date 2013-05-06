@@ -25,7 +25,7 @@ int start_game()
     char remoteIP[INET6_ADDRSTRLEN];
 
 	struct timeval tv;
-	tv.tv_sec = 300;
+	tv.tv_sec = 30;
 	tv.tv_usec = 0;
 	int listener = server_info.listen_fd;
 
