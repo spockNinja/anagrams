@@ -30,6 +30,8 @@
 // default number of rounds to be played
 #define def_rounds 5
 
+#define USERNAME_LEN 50
+
 #define max_base_word_length 8
 
 //Player datatype
@@ -37,7 +39,7 @@ typedef struct {
 	unsigned int points;		// current tally of the player's points
     unsigned int bonus_points; // number of points gained only through bonuses
 	int color;		// 0-9 preset colors, also works as their index
-	char* username; // hurr durr, this is the username
+	char username[USERNAME_LEN+1]; // hurr durr, this is the username
 	int portnumber;	// the port over whhich the user is communicating
 	bool connected;	// whether or not the client is currently connected
 	bool ready;		// whether or not the client is ready for a round (may get to)

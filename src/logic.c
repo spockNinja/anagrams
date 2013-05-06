@@ -16,7 +16,7 @@ while (list != NULL){
     j = valid_word(list->word);
     if(j>=0){
         printf("trying to send word %s\n", list->word);
-        //message_clients(update_slot(j, 0, list->word));
+        message_clients(update_slot(j, 0, list->word));
     }
     list = list->next;
 }

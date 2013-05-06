@@ -183,7 +183,7 @@ int start_server()
 	                            new_player.connected = true;
 	                            new_player.points = 0;
 	                            new_player.bonus_points = 0;
-	                            new_player.username = "\0";
+	                            new_player.username[0] = '\0';
 	                            for(int j = 1; j<=max_users;j++)
 	                            {
 	                                if(server_info.players[j].portnumber == null_player.portnumber)
@@ -236,9 +236,9 @@ int start_server()
 	                	    sscanf(buf, "%c%[^;]", &code, message);
                             if(code == 'n')
                             {
-                                server_info.players[cpi].username = calloc(nbytes, sizeof(char));
                                 message = check_name(message);
-                                strcpy(server_info.players[cpi].username, message);
+                                strncpy(server_info.players[cpi].username, message, nbytes);
+                                server_info.players[cpi].username[USERNAME_LEN] = '\0'; // strncpy doesn't do this
                                 printf("User on fd(%d) at index %d changed their username to: %s\n", i, cpi, message);
                                 message = update_name(cpi, message);
                                 write(i, message, strlen(message)+1);

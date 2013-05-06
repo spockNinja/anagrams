@@ -38,8 +38,8 @@ int compar_player(const void* player1, const void* player2){
 char* player_data(int player_index){
     Player* p = &server_info.players[player_index];
     char* cmd;
-    char* empty_string = "";
-    if(p->portnumber == null_player.portnumber) return empty_string;
+    char* space = " ";
+    if(p->portnumber == null_player.portnumber) return space;
 
     asprintf(&cmd, "%i:%u:%s,", p->color, p->points+p->bonus_points, p->username);
     return cmd;

@@ -263,9 +263,17 @@ static void process_user_input(int ch) {
 }
 
 static void show_prompt(char* message){
+    mvwaddstr(prompt, 3, 1, " Press anything else to dismiss.");
+    wrefresh(prompt);
 
+    top_panel(my_panels[0]);
 
-
+    update_panels();
+    doupdate();
+    usleep(100000);
+    hide_panel(my_panels[0]);
+    update_panels();
+    doupdate();
 }
 
 static void update_base_word(char* cmd) {
