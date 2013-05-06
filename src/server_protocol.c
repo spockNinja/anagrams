@@ -42,13 +42,12 @@ int compar_player(const void* player1, const void* player2){
 }
 
 char* player_data(int player_index){
-    Player p = server_info.players[player_index];
+    Player* p = &server_info.players[player_index];
     char* cmd;
     char* empty_string = "";
-    if(p.portnumber == null_player.portnumber) return empty_string;
-    printf("username: %s\n", server_info.players[player_index].username);
-    
-    asprintf(&cmd, "%i:%s", p.color, p.username);
+    if(p->portnumber == null_player.portnumber) return empty_string;
+
+    asprintf(&cmd, "%i:%s,", p->color, p->username);
     return cmd;
 }
 

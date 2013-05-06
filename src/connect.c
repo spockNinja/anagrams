@@ -17,7 +17,7 @@ void *get_in_addr(struct sockaddr *sa)
 
 int get_player_index(int port)
 {
-    for(int i = 0; i<server_info.num_players;i++)
+    for(int i = 0; i<=server_info.num_players;i++)
     {
         if(server_info.players[i].portnumber == port)
             return i;
@@ -213,7 +213,7 @@ int start_server()
                                 tempbuf[nbytes] = '\0';
                                 server_info.players[get_player_index(i)].username = calloc(strlen(tempbuf)+1, sizeof(char));
                                 strcpy(server_info.players[get_player_index(i)].username, tempbuf);
-                                printf("The user on fd(%d) changed their username to: %s\n", i, server_info.players[get_player_index(i)].username);
+                                printf("The user on fd(%d) at index %d changed their username to: %s\n", i, get_player_index(i), server_info.players[get_player_index(i)].username);
                             }
 	                	} 
 	                } // END handle data from client
