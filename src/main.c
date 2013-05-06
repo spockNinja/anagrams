@@ -89,7 +89,7 @@ int main (int argc, char* argv[]) {
         pick_word(list_head);
         generate_game_words(list_head);
         server_info.rare_chars = get_rare_chars(server_info.base_word->sorted_word);
-        printf("The word for round %d is: %s", round, server_info.base_word->word);
+        printf("The word for round %d is: %s\n", round, server_info.base_word->word);
         start_game();
     }
 }

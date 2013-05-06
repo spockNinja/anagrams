@@ -31,7 +31,7 @@ int start_game()
 	pthread_t timethread;
     struct targ time_arg;
     time_arg.t = &tv;
-    time_arg.interval = 1;
+    time_arg.interval = 30;
 	if(pthread_create(&timethread, NULL, timer, &time_arg) != 0)
 	{
 	    perror("cannot create thread");
@@ -98,11 +98,13 @@ int start_game()
 	                	{
 	                	    //current player index
 	                	    int cpi = get_player_index(i);
-	                	    
+	                	    buf[nbytes] = '\0';
+	                	    printf("message from client is : %s\n", buf);
 	                	    //parse client message
 	                	    char code;
 	                	    char* message;
 	                	    sscanf(buf, "%c%s;", &code, message);
+	                	    printf("sscanf determined the message was: %s\n", message);
                             if(code == 'w')
                             {
                                 printf("%s sent the word: %s\n", server_info.players[cpi].username, message);
@@ -110,14 +112,11 @@ int start_game()
                                 {
                                     server_info.players[cpi].points += word_value(message);
                                     server_info.players[cpi].bonus_points += word_bonus(message);
+                                    message_clients(update_score(cpi, (server_info.players[cpi].points + server_info.players[cpi].bonus_points)));
                                 }
                                 else
                                     write(i, "&;", 3);
                             }
-                            
-                            message = update_score(cpi, (server_info.players[cpi].points + server_info.players[cpi].bonus_points));
-                            message_clients(message);
-                            
 	                	} 
 	                } // END handle data from client
 	            } // END got new incoming connection
