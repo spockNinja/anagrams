@@ -60,11 +60,13 @@ char* update_bword(char* bword){
     int word_length = strlen(bword);
     char* raw_cmd = calloc(2*word_length+1, sizeof(char*));
     char lccs = server_info.rare_char;
+    bool found_lccs = false;
     int i, j;
     for (i = 0, j = 0; i < word_length; i++){
-        if (bword[i] == lccs){
+        if (!found_lccs && bword[i] == lccs){
             raw_cmd[j] = '.';
             j = j+1;
+            found_lccs = true;
         }
         raw_cmd[j] = bword[i];
         j = j+1;
