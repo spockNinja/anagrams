@@ -29,12 +29,6 @@ char* update_name(int player_index, char* player_name){
     return cmd;
 }
 
-char* update_score(int player_index, unsigned int score){
-    char* cmd;
-    asprintf(&cmd, "s%u,%u;\n", player_index, score);
-    return cmd;
-}
-
 int compar_player(const void* player1, const void* player2){
     Player* p1 = (Player*) player1;
     Player* p2 = (Player*) player2;
@@ -47,7 +41,7 @@ char* player_data(int player_index){
     char* empty_string = "";
     if(p->portnumber == null_player.portnumber) return empty_string;
 
-    asprintf(&cmd, "%i:%s,", p->color, p->username);
+    asprintf(&cmd, "%i:%s:%u,", p->color, p->username, p->points+p->bonus_points);
     return cmd;
 }
 
