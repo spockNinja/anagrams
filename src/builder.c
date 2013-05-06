@@ -154,6 +154,10 @@ void generate_game_words(struct word_node* list_head) {
                     server_info.base_word_factors->eights = new_head;
                     break;
             }
+            
+            struct word_node* new_head_two = create_node(current_node->word, current_node->sorted_word, current_node->len);
+            new_head_two->next = server_info.all_word_factors;
+            server_info.all_word_factors = new_head_two;
 
             words_found++;
         }

@@ -74,8 +74,18 @@ char* end_player_data(int player_index){
     char* cmd;
     char* empty_string = "";
     if(p->portnumber == null_player.portnumber) return empty_string;
-
-    asprintf(&cmd, "%i:%u-%u:%s,", p->color, p->points, p->bonus_points, p->username);
+    char* username = calloc(strlen(p->username)+6, sizeof(char));
+    username = p->username;
+    if(p->connected == false)
+    {
+        int i = strlen(p->username);
+        username[i+1] = '(';
+        username[i+2] = 'D';
+        username[i+3] = 'N';
+        username[i+4] = 'F';
+        username[i+5] = ')';
+    }
+    asprintf(&cmd, "%i:%u-%u:%s,", p->color, p->points, p->bonus_points, username);
     return cmd;
 }
 
@@ -127,7 +137,7 @@ char* update_slot(int slot_index, int player_index, char* word){
         raw_cmd[j] = '*';
     }
 
-    asprintf(&cmd, "w%i,%i%s;\n", slot_index, player_index, raw_cmd);
+    asprintf(&cmd, "w%i-%i,%i%s;\n", word_length, slot_index, player_index, raw_cmd);
     free(raw_cmd);
     return cmd;
 }
@@ -165,7 +175,6 @@ char* update_skeleton(struct word_set* base_word_factors){
             count_words(base_word_factors->eights));
     return cmd;
 }
-
 
 #if SERVER_PROTOCOL_DEBUG
 int main(int argc, char* argv[]){

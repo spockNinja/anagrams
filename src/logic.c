@@ -4,6 +4,21 @@
  */
 #include "server.h"
 
+void finish_puzzle(){
+
+struct word_node* list = server_info.all_word_factors;
+
+int j;
+while (list != NULL){
+    j = valid_word(list->word);
+    if(j>=0){
+        message_clients(update_slot(j, 0, list->word));
+    }
+    list = list->next;
+}
+
+}
+
 int start_game()
 {
     //before the game actually starts, send data they need
@@ -127,13 +142,19 @@ int start_game()
 		} // END else if for if this is a thing
 		else
 		{
-		    // the select timed out
+		    // the round is over
 		    server_info.players[last_scorer].bonus_points += 50;
+		    message_clients(update_player_list());
+            finish_puzzle();
+		    tv.tv_sec = 15;
+		    timer(&time_arg);
 		    message_clients(update_leaderboard());
-			break;
+		    tv.tv_sec = 10;
+		    timer(&time_arg);
+			return 0;
 		}
     } // END for(;;)--and you thought it would never end!
-
+   
 	printf("Done looking for users (30 seconds elapsed)\n");
 	
     return 0;
