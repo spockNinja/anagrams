@@ -25,14 +25,14 @@ int start_game()
     char remoteIP[INET6_ADDRSTRLEN];
 
 	struct timeval tv;
-	tv.tv_sec = 30;
+	tv.tv_sec = 120;
 	tv.tv_usec = 0;
 	int listener = server_info.listen_fd;
 
 	pthread_t timethread;
     struct targ time_arg;
     time_arg.t = &tv;
-    time_arg.interval = 1;
+    time_arg.interval = 30;
 	if(pthread_create(&timethread, NULL, timer, &time_arg) != 0)
 	{
 	    perror("cannot create thread");
@@ -112,8 +112,8 @@ int start_game()
                                 {
                                     server_info.players[cpi].points += word_value(message);
                                     server_info.players[cpi].bonus_points += word_bonus(message);
-                                    message_clients(update_score(cpi, (server_info.players[cpi].points + server_info.players[cpi].bonus_points)));
-                                    message_clients(update_slot(word_index, cpi, message));
+                                    message_clients(update_player_list());
+                                    message_clients(update_slot(word_index, server_info.players[cpi].color, message));
                                 }
                                 else
                                     write(i, "&;\n", 4);
