@@ -35,10 +35,43 @@ char* update_score(unsigned int player_index, unsigned int score){
     return cmd;
 }
 
+char* update_slot(int slot_index, int player_index, char* word){
+    char* cmd;
+    int word_length = strlen(word);
+    char* raw_cmd = calloc(2*word_length+1, sizeof(char*));
+    char lccs = server_info.rare_char;
+    int i, j;
+    for (i = 0, j = 0; i < word_length; i++){
+        if (word[i] == lccs){
+            raw_cmd[j] = '.';
+            j = j+1;
+        }
+        raw_cmd[j] = word[i];
+        j = j+1;
+    }
+
+    asprintf(&cmd, "w%i,%i%s;\n", slot_index, player_index, raw_cmd);
+    free(raw_cmd);
+    return cmd;
+}
+
 char* update_bword(char* bword){
     char* cmd;
-    // FIXME: include a '.' character in front of the bonus character
-    asprintf(&cmd, "b%s;\n", bword);
+    int word_length = strlen(bword);
+    char* raw_cmd = calloc(2*word_length+1, sizeof(char*));
+    char lccs = server_info.rare_char;
+    int i, j;
+    for (i = 0, j = 0; i < word_length; i++){
+        if (bword[i] == lccs){
+            raw_cmd[j] = '.';
+            j = j+1;
+        }
+        raw_cmd[j] = bword[i];
+        j = j+1;
+    }
+
+    asprintf(&cmd, "b%s;\n", raw_cmd);
+    free(raw_cmd);
     return cmd;
 }
 

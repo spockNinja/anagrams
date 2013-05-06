@@ -133,11 +133,9 @@ int word_bonus(char* word){
 
     int score = 0;
     int word_length = strlen(word);
-    char* lccs = server_info.rare_chars;
+    char lccs = server_info.rare_char;
     for (int i = 0; i < word_length; i++){
-        for (int j = 0; j < strlen(lccs); j++){
-           if (word[i] == lccs[j]) score += 5;        
-        }
+       if (word[i] == lccs) score += 5;        
     }
 
     if (word_length == server_info.base_word->len) score += 100;

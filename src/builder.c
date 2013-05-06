@@ -168,12 +168,12 @@ void generate_game_words(struct word_node* list_head) {
     }
 }
 
-char* get_rare_chars(const char* base){
+char get_rare_char(const char* base){
     
-    //least common characters
+    //least common character
     int base_len = strlen(base);
     int lcc = base_len;
-    char *result = malloc(sizeof(char) * base_len);
+    char result;
     for(int i = 0; i<base_len;)
     {
         //current character count
@@ -191,7 +191,7 @@ char* get_rare_chars(const char* base){
         if(ccc<=lcc)
         {
             lcc = ccc;
-            strcpy(result, bc);
+            result = bc[0];
         }
     }
     return result;

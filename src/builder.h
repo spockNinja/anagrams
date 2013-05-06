@@ -9,4 +9,4 @@ void pick_word(struct word_node* list_head);
 
 void generate_game_words(struct word_node* list_head);
 
-char* get_rare_chars(const char* base);
+char get_rare_char(const char* base);
