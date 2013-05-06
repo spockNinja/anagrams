@@ -64,7 +64,7 @@ int valid_word(const char* test_word){
     used_list = server_info.used_word_factors;
     while (used_list != NULL){
         int cmp = strcmp(used_list->word, test_word);
-        if (cmp == 0) return false;
+        if (cmp == 0) return -1;
         used_list = used_list->next;
     }
 

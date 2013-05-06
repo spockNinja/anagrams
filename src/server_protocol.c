@@ -41,7 +41,7 @@ char* player_data(int player_index){
     char* empty_string = "";
     if(p->portnumber == null_player.portnumber) return empty_string;
 
-    asprintf(&cmd, "%i:%s:%u,", p->color, p->username, p->points+p->bonus_points);
+    asprintf(&cmd, "%i:%u:%s,", p->color, p->points+p->bonus_points, p->username);
     return cmd;
 }
 
@@ -75,7 +75,7 @@ char* end_player_data(int player_index){
     char* empty_string = "";
     if(p->portnumber == null_player.portnumber) return empty_string;
 
-    asprintf(&cmd, "%i:%s:%u-%u,", p->color, p->username, p->points, p->bonus_points);
+    asprintf(&cmd, "%i:%u-%u:%s,", p->color, p->points, p->bonus_points, p->username);
     return cmd;
 }
 
