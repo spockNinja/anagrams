@@ -212,6 +212,7 @@ int start_server()
                                 }
                                 tempbuf[nbytes] = '\0';
                                 printf("The user on fd(%d) changed their username to: %s\n", i, tempbuf);
+                                server_info.players[get_player_index(i)].username = tempbuf;
                             }
 	                	} 
 	                } // END handle data from client
