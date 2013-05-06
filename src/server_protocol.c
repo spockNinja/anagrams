@@ -41,9 +41,12 @@ int compar_player(const void* player1, const void* player2){
     return p1->points > p2->points ? 1 : p1->points == p2->points ? 0 : -1;
 }
 
-char* player_data(Player p){
+char* player_data(int player_index){
+    Player p = server_info.players[player_index];
     char* cmd;
-    if(p.portnumber == null_player.portnumber) return "";
+    char* empty_string = "";
+    if(p.portnumber == null_player.portnumber) return empty_string;
+    printf("username: %s\n", server_info.players[player_index].username);
     
     asprintf(&cmd, "%i:%s", p.color, p.username);
     return cmd;
@@ -55,18 +58,20 @@ char* update_player_list(){
     // printf("preparing to sort the players\n");
     // qsort(&server_info.players[1], max_users, sizeof (Player*), compar_player);
     // printf("sorted the players\n");
+    
+    printf("building player list string\n");
 
     asprintf(&cmd, "p%s%s%s%s%s%s%s%s%s%s;\n", 
-           player_data(server_info.players[1]),
-           player_data(server_info.players[2]),
-           player_data(server_info.players[3]),
-           player_data(server_info.players[4]),
-           player_data(server_info.players[5]),
-           player_data(server_info.players[6]),
-           player_data(server_info.players[7]),
-           player_data(server_info.players[8]),
-           player_data(server_info.players[9]),
-           player_data(server_info.players[10])
+           player_data(1),
+           player_data(2),
+           player_data(3),
+           player_data(4),
+           player_data(5),
+           player_data(6),
+           player_data(7),
+           player_data(8),
+           player_data(9),
+           player_data(10)
            );
     return cmd;
 }
