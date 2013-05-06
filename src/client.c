@@ -55,7 +55,7 @@ static void ring_bell();
 static void parse_server_command(char *cmd);
 static void process_user_input(int ch);
 static void send_message(char code, char* word);
-static void prompt(char* message);
+static void show_prompt(char* message);
 
 int main(int argc, char* argv[]){
     // The client will be dumb and single threaded.
@@ -262,7 +262,7 @@ static void process_user_input(int ch) {
     }
 }
 
-static void prompt(char* message){
+static void show_prompt(char* message){
 
 
 
