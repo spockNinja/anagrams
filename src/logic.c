@@ -133,8 +133,8 @@ int start_game()
                                 {
                                     server_info.players[cpi].points += word_value(message);
                                     server_info.players[cpi].bonus_points += word_bonus(message);
-                                    message_clients(update_player_list());
                                     message_clients(update_slot(word_index, server_info.players[cpi].color, message));
+                                    message_clients(update_player_list());
                                     last_scorer = cpi;
                                 }
                                 else
