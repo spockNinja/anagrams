@@ -404,7 +404,7 @@ static void show_leaderboard(char* cmd) {
         wattron(puzzle_words, COLOR_PAIR(player_num+1));
         mvwprintw(puzzle_words, y, 15, "%s %10d %5d", username, score, bonus);
         wattroff(puzzle_words, COLOR_PAIR(player_num+1));
-        cmd += offset;
+        cmd += offset+1;
         y++;
     }
     wrefresh(puzzle_words);
@@ -422,7 +422,9 @@ static void update_player_list(char* cmd) {
         wattron(rankings, COLOR_PAIR(player_num+1));
         mvwprintw(rankings, y, 1, "%s %5d", username, score);
         wattroff(rankings, COLOR_PAIR(player_num+1));
-        cmd += offset;
+        //printf("offset modified by %d bytes\n", offset);
+        cmd += offset+1;
+        //printf("%s is the resulting string\n", cmd);
         y++;
     }
     wrefresh(rankings);
