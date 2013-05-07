@@ -304,10 +304,10 @@ static void update_word_list(char* cmd) {
     int num_words;
     int column = 2;
     int offset = 0;
-    bool wrapped = false;
     while(sscanf(cmd, "%i:%i,%n", &word_len, &num_words, &offset) > 0) {
         int i;
         int j;
+        bool wrapped = false;
         columns[word_len-3] = column;
         for(i=0; i <= num_words; i++) {
             if (!wrapped && i > MAX_WORD_LIST) {
@@ -331,11 +331,12 @@ static void tell_username(char* cmd) {
 
     my_player_num = player_num;
 
+    // show prompt for username
     char *usr_msg;
     asprintf(&usr_msg, "Your username is %s", username);
     fill_prompt(usr_msg,
-                "Click anything to make",
-                "this prompt go away.");
+                "Please wait for other",
+                "players to join the game.");
 
     top_panel(my_panels[0]);
     update_panels();
@@ -354,6 +355,14 @@ static void update_word(char* cmd) {
     int word_len;
     char* word = calloc(strlen(cmd), 1);
     sscanf(cmd, "%i-%i,%i%s", &word_len, &word_index, &player_num, word);
+
+    if (player_num == 0 && accept_user_input) {
+        accept_user_input = false;
+        werase(puzzle_words);
+        box(puzzle_words, 0, 0);
+        mvwaddstr(puzzle_words, 1, 1, "The round is now over.");
+        wrefresh(puzzle_words);
+    }
 
     int y = (word_index % MAX_WORD_LIST)+1;
     int x = columns[word_len-3];
@@ -380,6 +389,28 @@ static void update_word(char* cmd) {
     }
     wrefresh(puzzle_words);
 }
+
+static void show_leaderboard(char* cmd) {
+    int player_num;
+    int score;
+    int bonus;
+    char* username = calloc(strlen(cmd), 1);
+    int offset = 0;
+    int y = 5;
+    werase(puzzle_words);
+    box(puzzle_words, 0, 0);
+    mvwaddstr(puzzle_words, 3, 15, "Player     Score     Bonus");
+    while(sscanf(cmd, "%i:%i-%i:%[^,]%n", &player_num, &score, &bonus, username, &offset) > 0) {
+        wattron(puzzle_words, COLOR_PAIR(player_num+1));
+        mvwprintw(puzzle_words, y, 15, "%s %10d %5d", username, score, bonus);
+        wattroff(puzzle_words, COLOR_PAIR(player_num+1));
+        cmd += offset;
+        y++;
+    }
+    wrefresh(puzzle_words);
+    free(username);
+}
+
 
 static void update_player_list(char* cmd) {
     int player_num;
@@ -418,6 +449,10 @@ static void parse_server_command(char* cmd) {
 
     switch(code) {
         case 'b':
+            // signals round start
+            hide_panel(my_panels[0]);
+            update_panels();
+            doupdate();
             update_base_word(message);
             accept_user_input = true;
             break;
@@ -438,6 +473,9 @@ static void parse_server_command(char* cmd) {
             break;
         case 'w':
             update_word(message);
+            break;
+        case '*':
+            show_leaderboard(message);
             break;
         case '&':
             ring_bell();
