@@ -47,7 +47,9 @@ struct word_node* history_next = NULL;
 
 // The word that the user is in the process of building
 char current_word[9];
-char cmd_buffer[128];
+char cmd_buffer[1000];
+int my_player_num;
+int columns[6];
 
 static void quit();
 static void init_windows();
@@ -55,7 +57,7 @@ static void ring_bell();
 static void parse_server_command(char *cmd);
 static void process_user_input(int ch);
 static void send_message(char code, char* word);
-static void show_prompt(char* message, int duration);
+static void fill_prompt(char* l1, char* l2, char* l3);
 
 int main(int argc, char* argv[]){
     // The client will be dumb and single threaded.
@@ -77,6 +79,11 @@ int main(int argc, char* argv[]){
         SERVER_PORT = atoi(argv[1]);
         USERNAME = argv[2];
     };
+
+    if (strlen(USERNAME) > 10) {
+        fprintf(stderr, "%s is too long. Please choose a username 10 or less characters long.\n");
+        exit(EXIT_FAILURE);
+    }
 
     // create a socket for the client
     client = socket(AF_INET, SOCK_STREAM, 0);
@@ -264,18 +271,11 @@ static void process_user_input(int ch) {
     }
 }
 
-static void show_prompt(char* message, int duration){
-    mvwaddstr(prompt, 2, 1, message);
+static void fill_prompt(char* line1, char* line2, char* line3){
+    mvwaddstr(prompt, 1, 2, line1);
+    mvwaddstr(prompt, 2, 2, line2);
+    mvwaddstr(prompt, 3, 2, line3);
     wrefresh(prompt);
-
-    top_panel(my_panels[0]);
-
-    update_panels();
-    doupdate();
-    usleep(duration);
-    hide_panel(my_panels[0]);
-    update_panels();
-    doupdate();
 }
 
 static void update_base_word(char* cmd) {
@@ -302,16 +302,22 @@ static void update_base_word(char* cmd) {
 }
 
 static void update_word_list(char* cmd) {
+    // clear the window
+    werase(puzzle_words);
+    box(puzzle_words, 0, 0);
+
+    // process cmd
     int word_len;
     int num_words;
     int column = 2;
     int offset = 0;
-    bool wrapped = false;
     while(sscanf(cmd, "%i:%i,%n", &word_len, &num_words, &offset) > 0) {
         int i;
         int j;
-        for(i=0; i <= num_words; i++) {
-            if (!wrapped && i > MAX_WORD_LIST) {
+        bool wrapped = false;
+        columns[word_len-3] = column;
+        for(i=0; i < num_words; i++) {
+            if (!wrapped && i == MAX_WORD_LIST) {
                 column += (word_len + 2);
                 wrapped = true;
             }
@@ -326,7 +332,91 @@ static void update_word_list(char* cmd) {
 }
 
 static void tell_username(char* cmd) {
+    int player_num;
+    char* username = calloc(strlen(cmd), 1);
+    sscanf(cmd, "%i,%s", &player_num, username);
+
+    my_player_num = player_num;
+
+    // show prompt for username
+    char *usr_msg;
+    asprintf(&usr_msg, "Your username is %s", username);
+    fill_prompt(usr_msg,
+                "Please wait for other",
+                "players to join the game.");
+
+    top_panel(my_panels[0]);
+    update_panels();
+    doupdate();
 }
+
+static void update_word(char* cmd) {
+    int player_num;
+    int word_index;
+    int word_len;
+    char* word = calloc(strlen(cmd), 1);
+    sscanf(cmd, "%i-%i,%i%s", &word_len, &word_index, &player_num, word);
+
+    if (player_num == 0 && accept_user_input) {
+        accept_user_input = false;
+        werase(word_input);
+        box(word_input, 0, 0);
+        mvwaddstr(word_input, 1, 1, "The round is now over.");
+        wrefresh(word_input);
+    }
+
+    int y = (word_index % MAX_WORD_LIST)+1;
+    int x = columns[word_len-3];
+    if (word_index >= MAX_WORD_LIST) {
+        x += (word_len+2);
+    }
+
+    int cmd_ch;
+    int word_ch = 0;
+    for (cmd_ch=0; cmd_ch < strlen(word); cmd_ch++) {
+        // if the char is supposed to be highlighted
+        wattron(puzzle_words, COLOR_PAIR(player_num+1));
+        if (word[cmd_ch] == '.') {
+            // user the reverse attribute and consume the '.'
+            mvwaddch(puzzle_words, y, x, word[cmd_ch+1] | A_REVERSE);
+            cmd_ch++;
+        }
+        else {
+            mvwaddch(puzzle_words, y, x, word[cmd_ch]);
+        }
+        wattroff(puzzle_words, COLOR_PAIR(player_num+1));
+        x++;
+        word_ch++;
+    }
+    wrefresh(puzzle_words);
+}
+
+static void show_leaderboard(char* cmd) {
+    int player_num;
+    int score;
+    int bonus;
+    char* username = calloc(strlen(cmd), 1);
+    int offset = 0;
+    int y = 5;
+    werase(puzzle_words);
+    box(puzzle_words, 0, 0);
+    mvwaddstr(puzzle_words, 3, 10, "Player");
+    mvwaddstr(puzzle_words, 3, 25, "Score");
+    mvwaddstr(puzzle_words, 3, 32, "Bonus");
+    while(sscanf(cmd, "%i:%i-%i:%[^,]%n", &player_num, &score, &bonus, username, &offset) > 0) {
+        wattron(puzzle_words, COLOR_PAIR(player_num+1));
+        mvwaddstr(puzzle_words, y, 10, username);
+        mvwprintw(puzzle_words, y, 25, "%5d", score);
+        mvwprintw(puzzle_words, y, 32, "%5d", bonus);
+        wattroff(puzzle_words, COLOR_PAIR(player_num+1));
+        // increase offset by one to consume the comma
+        cmd += offset+1;
+        y++;
+    }
+    wrefresh(puzzle_words);
+    free(username);
+}
+
 
 static void update_player_list(char* cmd) {
     int player_num;
@@ -334,11 +424,18 @@ static void update_player_list(char* cmd) {
     char* username = calloc(strlen(cmd), 1);
     int offset = 0;
     int y = 1;
+
+    // clear window
+    werase(rankings);
+    box(rankings, 0, 0);
+
     while(sscanf(cmd, "%i:%i:%[^,]%n", &player_num, &score, username, &offset) > 0) {
         wattron(rankings, COLOR_PAIR(player_num+1));
-        mvwprintw(rankings, y, 1, "%s %5d", username, score);
+        mvwaddstr(rankings, y, 1, username);
+        mvwprintw(rankings, y, 14, "%5d", score);
         wattroff(rankings, COLOR_PAIR(player_num+1));
-        cmd += offset;
+        // increase offset by one to consume the comma
+        cmd += offset+1;
         y++;
     }
     wrefresh(rankings);
@@ -365,7 +462,15 @@ static void parse_server_command(char* cmd) {
 
     switch(code) {
         case 'b':
+            // signals round start
+            hide_panel(my_panels[0]);
+            update_panels();
+            doupdate();
             update_base_word(message);
+            werase(word_input);
+            box(word_input, 0, 0);
+            wmove(word_input, 1, 1);
+            wrefresh(word_input);
             accept_user_input = true;
             break;
         case 'l':
@@ -377,11 +482,17 @@ static void parse_server_command(char* cmd) {
         case 'p':
             update_player_list(message);
             break;
+        case 'r':
+            update_round_number(message);
+            break;
         case 't':
             update_time(message);
             break;
-        case 'r':
-            update_round_number(message);
+        case 'w':
+            update_word(message);
+            break;
+        case '*':
+            show_leaderboard(message);
             break;
         case '&':
             ring_bell();
@@ -414,6 +525,7 @@ static void init_windows() {
     initscr();
     raw();
     noecho();
+    curs_set(0);
 
     if (!has_colors()) {
         endwin();
@@ -433,11 +545,6 @@ static void init_windows() {
     word_input = newwin(3, 60, 22, 0);
     prompt = newwin(5, 35, 8, 20);
     bell = newwin(6, 13, 8, 30);
-    // Prompt
-    mvwaddstr(prompt, 1, 1, " Are your sure you want to quit?");
-    mvwaddstr(prompt, 2, 1, " Press y or Y to confirm.");
-    mvwaddstr(prompt, 3, 1, " Press anything else to dismiss.");
-    wrefresh(prompt);
 
     // Bell
     mvwaddstr(bell, 0, 4, "_(#)_");
@@ -494,6 +601,10 @@ static void init_windows() {
 
 static void quit()
 {
+    fill_prompt("Are your sure you want to quit?",
+                "Press y or Y to confirm.",
+                "Press anything else to dismiss.");
+
     top_panel(my_panels[0]);
     update_panels();
     doupdate();
