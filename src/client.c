@@ -47,7 +47,7 @@ struct word_node* history_next = NULL;
 
 // The word that the user is in the process of building
 char current_word[9];
-char cmd_buffer[128];
+char cmd_buffer[1000];
 int my_player_num;
 int columns[6];
 
@@ -358,10 +358,10 @@ static void update_word(char* cmd) {
 
     if (player_num == 0 && accept_user_input) {
         accept_user_input = false;
-        werase(puzzle_words);
-        box(puzzle_words, 0, 0);
-        mvwaddstr(puzzle_words, 1, 1, "The round is now over.");
-        wrefresh(puzzle_words);
+        werase(word_input);
+        box(word_input, 0, 0);
+        mvwaddstr(word_input, 1, 1, "The round is now over.");
+        wrefresh(word_input);
     }
 
     int y = (word_index % MAX_WORD_LIST)+1;

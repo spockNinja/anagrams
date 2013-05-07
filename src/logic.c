@@ -19,6 +19,7 @@ while (list != NULL){
         message_clients(update_slot(j, 0, list->word));
     }
     list = list->next;
+    usleep(100000);
 }
 
 }
