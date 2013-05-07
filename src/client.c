@@ -80,6 +80,11 @@ int main(int argc, char* argv[]){
         USERNAME = argv[2];
     };
 
+    if (strlen(USERNAME) > 10) {
+        fprintf(stderr, "%s is too long. Please choose a username 10 or less characters long.\n");
+        exit(EXIT_FAILURE);
+    }
+
     // create a socket for the client
     client = socket(AF_INET, SOCK_STREAM, 0);
     if (client == -1) {
@@ -402,6 +407,7 @@ static void show_leaderboard(char* cmd) {
         mvwprintw(puzzle_words, y, 25, "%5d", score);
         mvwprintw(puzzle_words, y, 32, "%5d", bonus);
         wattroff(puzzle_words, COLOR_PAIR(player_num+1));
+        // increase offset by one to consume the comma
         cmd += offset+1;
         y++;
     }
@@ -416,13 +422,18 @@ static void update_player_list(char* cmd) {
     char* username = calloc(strlen(cmd), 1);
     int offset = 0;
     int y = 1;
+
+    // clear window
+    werase(rankings);
+    box(rankings, 0, 0);
+
     while(sscanf(cmd, "%i:%i:%[^,]%n", &player_num, &score, username, &offset) > 0) {
         wattron(rankings, COLOR_PAIR(player_num+1));
-        mvwprintw(rankings, y, 1, "%s %5d", username, score);
+        mvwaddstr(rankings, y, 1, username);
+        mvwprintw(rankings, y, 14, "%5d", score);
         wattroff(rankings, COLOR_PAIR(player_num+1));
-        //printf("offset modified by %d bytes\n", offset);
+        // increase offset by one to consume the comma
         cmd += offset+1;
-        //printf("%s is the resulting string\n", cmd);
         y++;
     }
     wrefresh(rankings);
