@@ -427,7 +427,7 @@ static void update_player_list(char* cmd) {
 
     // clear window
     werase(rankings);
-    box(rankings, 0, 0);
+    box(rankings, '|', '-');
 
     while(sscanf(cmd, "%i:%i:%[^,]%n", &player_num, &score, username, &offset) > 0) {
         wattron(rankings, COLOR_PAIR(player_num+1));
@@ -573,11 +573,11 @@ static void init_windows() {
     my_panels[5] = new_panel(word_input);
 
     // Create borders around the windows
-    box(round_info, 0, 0);
-    box(rankings, 0, 0);
-    box(puzzle_words, 0, 0);
-    box(word_input, 0, 0);
-    box(prompt, 0, 0);
+    box(round_info, '|', '-');
+    box(rankings, '|', '-');
+    box(puzzle_words, '|', '-');
+    box(word_input, '|', '-');
+    box(prompt, '|', '-');
 
     // Initialize all color pairs for the possible players
     int i;
