@@ -238,7 +238,7 @@ int start_server()
                             {
                                 message = check_name(message);
                                 strncpy(server_info.players[cpi].username, message, nbytes);
-                                server_info.players[cpi].username[USERNAME_LEN] = '\0'; // strncpy doesn't do this
+                                //server_info.players[cpi].username[USERNAME_LEN] = '\0'; // strncpy doesn't do this
                                 printf("User on fd(%d) at index %d changed their username to: %s\n", i, cpi, message);
                                 message = update_name(cpi, message);
                                 write(i, message, strlen(message)+1);

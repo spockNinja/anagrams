@@ -55,7 +55,7 @@ static void ring_bell();
 static void parse_server_command(char *cmd);
 static void process_user_input(int ch);
 static void send_message(char code, char* word);
-static void show_prompt(char* message);
+static void show_prompt(char* message, int duration);
 
 int main(int argc, char* argv[]){
     // The client will be dumb and single threaded.
@@ -113,6 +113,8 @@ int main(int argc, char* argv[]){
 
     // Make sure current_word starts out with all null chars
     memset(current_word, 0, 9);
+
+    // show_prompt("waiting for round to start", 30000000); // initial 30s wait
 
     // process input as long as it keeps coming
     for (;;) {
@@ -262,15 +264,15 @@ static void process_user_input(int ch) {
     }
 }
 
-static void show_prompt(char* message){
-    mvwaddstr(prompt, 3, 1, " Press anything else to dismiss.");
+static void show_prompt(char* message, int duration){
+    mvwaddstr(prompt, 2, 1, message);
     wrefresh(prompt);
 
     top_panel(my_panels[0]);
 
     update_panels();
     doupdate();
-    usleep(100000);
+    usleep(duration);
     hide_panel(my_panels[0]);
     update_panels();
     doupdate();

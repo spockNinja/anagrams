@@ -52,7 +52,7 @@ int start_game()
 	pthread_t timethread;
     struct targ time_arg;
     time_arg.t = &tv;
-    time_arg.interval = 30;
+    time_arg.interval = 1;
 	if(pthread_create(&timethread, NULL, (void*) &timer, &time_arg) != 0)
 	{
 	    perror("cannot create thread");

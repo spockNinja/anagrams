@@ -11,7 +11,7 @@ void message_clients(const char* command){
     for (int i = 0; i <= server_info.num_players; i++){
         if(FD_ISSET(server_info.players[i].portnumber, &(server_info.current_users))) {
             if (write(server_info.players[i].portnumber, command, strlen(command)+1) == -1)
-                fprintf(stderr, "message failure to fd#%i, message: %s\n", i, command);
+                perror("message failure, (did a client crash?)\n");
         }
     }
 
@@ -38,8 +38,7 @@ int compar_player(const void* player1, const void* player2){
 char* player_data(int player_index){
     Player* p = &server_info.players[player_index];
     char* cmd;
-    char* space = " ";
-    if(p->portnumber == null_player.portnumber) return space;
+    if(p->portnumber == null_player.portnumber) return null_player.username;
 
     asprintf(&cmd, "%i:%u:%s,", p->color, p->points+p->bonus_points, p->username);
     return cmd;
