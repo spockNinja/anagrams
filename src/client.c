@@ -81,7 +81,7 @@ int main(int argc, char* argv[]){
     };
 
     if (strlen(USERNAME) > 10) {
-        fprintf(stderr, "%s is too long. Please choose a username 10 or less characters long.\n");
+        fprintf(stderr, "%s is too long. Please choose a username 10 or less characters long.\n", USERNAME);
         exit(EXIT_FAILURE);
     }
 
