@@ -309,8 +309,8 @@ static void update_word_list(char* cmd) {
         int j;
         bool wrapped = false;
         columns[word_len-3] = column;
-        for(i=0; i <= num_words; i++) {
-            if (!wrapped && i > MAX_WORD_LIST) {
+        for(i=0; i < num_words; i++) {
+            if (!wrapped && i == MAX_WORD_LIST) {
                 column += (word_len + 2);
                 wrapped = true;
             }
@@ -341,12 +341,6 @@ static void tell_username(char* cmd) {
     top_panel(my_panels[0]);
     update_panels();
     doupdate();
-
-    getch();
-
-    hide_panel(my_panels[0]);
-    update_panels();
-    doupdate();
 }
 
 static void update_word(char* cmd) {
@@ -366,7 +360,7 @@ static void update_word(char* cmd) {
 
     int y = (word_index % MAX_WORD_LIST)+1;
     int x = columns[word_len-3];
-    if (word_index > MAX_WORD_LIST) {
+    if (word_index >= MAX_WORD_LIST) {
         x += (word_len+2);
     }
 
@@ -399,10 +393,14 @@ static void show_leaderboard(char* cmd) {
     int y = 5;
     werase(puzzle_words);
     box(puzzle_words, 0, 0);
-    mvwaddstr(puzzle_words, 3, 15, "Player     Score     Bonus");
+    mvwaddstr(puzzle_words, 3, 10, "Player");
+    mvwaddstr(puzzle_words, 3, 25, "Score");
+    mvwaddstr(puzzle_words, 3, 32, "Bonus");
     while(sscanf(cmd, "%i:%i-%i:%[^,]%n", &player_num, &score, &bonus, username, &offset) > 0) {
         wattron(puzzle_words, COLOR_PAIR(player_num+1));
-        mvwprintw(puzzle_words, y, 15, "%s %10d %5d", username, score, bonus);
+        mvwaddstr(puzzle_words, y, 10, username);
+        mvwprintw(puzzle_words, y, 25, "%5d", score);
+        mvwprintw(puzzle_words, y, 32, "%5d", bonus);
         wattroff(puzzle_words, COLOR_PAIR(player_num+1));
         cmd += offset;
         y++;
@@ -454,6 +452,10 @@ static void parse_server_command(char* cmd) {
             update_panels();
             doupdate();
             update_base_word(message);
+            werase(word_input);
+            box(word_input, 0, 0);
+            wmove(word_input, 1, 1);
+            wrefresh(word_input);
             accept_user_input = true;
             break;
         case 'l':
@@ -508,6 +510,7 @@ static void init_windows() {
     initscr();
     raw();
     noecho();
+    curs_set(0);
 
     if (!has_colors()) {
         endwin();
