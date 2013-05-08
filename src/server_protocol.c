@@ -74,10 +74,12 @@ char* end_player_data(int player_index){
     char* empty_string = "";
     if(p->portnumber == null_player.portnumber) return empty_string;
     char* username = calloc(strlen(p->username)+6, sizeof(char));
-    username = p->username;
+    username = strndup(p->username, strlen(p->username)+6);
     if(p->connected == false)
     {
+        printf("changing %s's username to %s (DNF)\n", p->username, p->username);
         int i = strlen(p->username);
+        username[i]   = ' ';
         username[i+1] = '(';
         username[i+2] = 'D';
         username[i+3] = 'N';

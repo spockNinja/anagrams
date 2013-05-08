@@ -454,8 +454,12 @@ static void update_player_list(char* cmd) {
 }
 
 static void update_time(char *cmd){
-    mvwaddstr(round_info, 1, 75, "    ");
-    mvwaddstr(round_info, 1, 75, cmd);
+    int time = 0;
+    sscanf(cmd, "%d", &time);
+    char *new_time;
+    asprintf(&new_time, "%d:%d%d", time/60, (time%60)/10, (time%60)%10);
+    mvwaddstr(round_info, 1, 75, "   ");
+    mvwaddstr(round_info, 1, 75, new_time);
     wrefresh(round_info);
 }
 

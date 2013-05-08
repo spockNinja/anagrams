@@ -103,13 +103,12 @@ int start_game()
 	                    // handle data from a client
 	                    if ((nbytes = recv(i, buf, sizeof buf, 0)) <= 0) {
 	                        // got error or connection closed by client
-	                        if (nbytes == 0) {
-	                            // connection closed
-	                            printf("selectserver: socket %d hung up\n", i);
-	                            server_info.players[get_player_index(i)].connected = false;
-	                            server_info.num_players--;
-	                            }
-	                        else {
+                            // connection closed
+                            printf("selectserver: socket %d hung up\n", i);
+                            server_info.players[get_player_index(i)].connected = false;
+                            server_info.num_players--;
+	                        if(nbytes < 0) {
+	                            printf("recv returned: %d\n", nbytes);
 	                            perror("recv");
 	                        }
 	                        close(i); // bye!

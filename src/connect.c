@@ -118,13 +118,11 @@ void dc_check()
 	                    // handle data from a client
 	                    if ((nbytes = recv(i, buf, sizeof buf, 0)) <= 0) {
 	                        // got error or connection closed by client
-	                        if (nbytes == 0) {
-	                            // connection closed
-	                            printf("selectserver: socket %d hung up\n", i);
-	                            server_info.players[get_player_index(i)].connected = false;
-	                            server_info.num_players--;
-	                            }
-	                        else {
+                            // connection closed
+                            printf("selectserver: socket %d hung up\n", i);
+                            server_info.players[get_player_index(i)].connected = false;
+                            server_info.num_players--;
+	                        if (nbytes < 0) {
 	                            perror("recv");
 	                        }
 	                        close(i); // bye!
@@ -303,13 +301,11 @@ int start_server()
 	                    // handle data from a client
 	                    if ((nbytes = recv(i, buf, sizeof buf, 0)) <= 0) {
 	                        // got error or connection closed by client
-	                        if (nbytes == 0) {
-	                            // connection closed
-	                            printf("selectserver: socket %d hung up\n", i);
-	                            server_info.players[get_player_index(i)] = null_player;
-	                            server_info.num_players--;
-	                            }
-	                        else {
+                            // connection closed
+                            printf("selectserver: socket %d hung up\n", i);
+                            server_info.players[get_player_index(i)] = null_player;
+                            server_info.num_players--;
+	                        if (nbytes > 0) {
 	                            perror("recv");
 	                        }
 	                        close(i); // bye!
