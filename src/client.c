@@ -401,13 +401,13 @@ static void show_leaderboard(char* cmd) {
     werase(puzzle_words);
     box(puzzle_words, 0, 0);
     mvwaddstr(puzzle_words, 3, 10, "Player");
-    mvwaddstr(puzzle_words, 3, 25, "Score");
-    mvwaddstr(puzzle_words, 3, 32, "Bonus");
+    mvwaddstr(puzzle_words, 3, 30, "Score");
+    mvwaddstr(puzzle_words, 3, 37, "Bonus");
     while(sscanf(cmd, "%i:%i-%i:%[^,]%n", &player_num, &score, &bonus, username, &offset) > 0) {
         wattron(puzzle_words, COLOR_PAIR(player_num+1));
         mvwaddstr(puzzle_words, y, 10, username);
-        mvwprintw(puzzle_words, y, 25, "%5d", score);
-        mvwprintw(puzzle_words, y, 32, "%5d", bonus);
+        mvwprintw(puzzle_words, y, 30, "%5d", score);
+        mvwprintw(puzzle_words, y, 37, "%5d", bonus);
         wattroff(puzzle_words, COLOR_PAIR(player_num+1));
         // increase offset by one to consume the comma
         cmd += offset+1;
