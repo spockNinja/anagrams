@@ -154,7 +154,10 @@ unsigned int word_bonus(char* word){
        if (word[i] == lccs) score += 5;        
     }
 
-    if (word_length == server_info.base_word->len) score += 100;
+    if (!server_info.longest_word_found && word_length == server_info.base_word->len){
+        server_info.longest_word_found = true;
+        score += 100;
+    }
 
     return score;
 }

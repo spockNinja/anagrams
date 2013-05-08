@@ -19,6 +19,7 @@ void reset_words(Server_Info* server) {
     server_info.base_word_factors->eights = NULL;
     server_info.used_word_factors = NULL;
     server_info.all_word_factors = NULL;
+    server_info.longest_word_found = false;
 }
 
 // The main server method
@@ -84,6 +85,7 @@ int main (int argc, char* argv[]) {
     server_info.base_word_factors->eights = NULL;
     server_info.used_word_factors = NULL;
     server_info.all_word_factors = NULL;
+    server_info.longest_word_found = false;
 
     struct word_node* list_head = read_list(word_list);
 

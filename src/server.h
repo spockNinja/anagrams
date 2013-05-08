@@ -60,6 +60,7 @@ typedef struct {
     char rare_char;      // used for bonus
     fd_set current_users;  // all user file descriptors
     int listen_fd;         // this is here to keep the listener listening
+    bool longest_word_found;
 } Server_Info;
 
 
