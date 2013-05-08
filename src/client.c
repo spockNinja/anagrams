@@ -23,6 +23,15 @@
 #define ROWS 25
 #define MAX_WORD_LIST 19
 
+#define ls '|'
+#define rs '|'
+#define ts '-'
+#define bs '-'
+#define tl '+'
+#define tr '+'
+#define bl '+'
+#define br '+'
+
 const char LOCALHOST[] = "127.0.0.1";
 
 int client;
@@ -304,7 +313,7 @@ static void update_base_word(char* cmd) {
 static void update_word_list(char* cmd) {
     // clear the window
     werase(puzzle_words);
-    box(puzzle_words, 0, 0);
+    wborder(puzzle_words, ls, rs, ts, bs, tl, tr, bl, br);
 
     // process cmd
     int word_len;
@@ -399,7 +408,9 @@ static void show_leaderboard(char* cmd) {
     int offset = 0;
     int y = 5;
     werase(puzzle_words);
-    box(puzzle_words, 0, 0);
+    wborder(puzzle_words, ls, rs, ts, bs, tl, tr, bl, br);
+
+
     mvwaddstr(puzzle_words, 3, 10, "Player");
     mvwaddstr(puzzle_words, 3, 25, "Score");
     mvwaddstr(puzzle_words, 3, 32, "Bonus");
@@ -427,7 +438,7 @@ static void update_player_list(char* cmd) {
 
     // clear window
     werase(rankings);
-    box(rankings, 0, 0);
+    wborder(rankings, ls, rs, ts, bs, tl, tr, bl, br);
 
     while(sscanf(cmd, "%i:%i:%[^,]%n", &player_num, &score, username, &offset) > 0) {
         wattron(rankings, COLOR_PAIR(player_num+1));
@@ -468,7 +479,7 @@ static void parse_server_command(char* cmd) {
             doupdate();
             update_base_word(message);
             werase(word_input);
-            box(word_input, 0, 0);
+            wborder(word_input, ls, rs, ts, bs, tl, tr, bl, br);
             wmove(word_input, 1, 1);
             wrefresh(word_input);
             accept_user_input = true;
@@ -573,11 +584,11 @@ static void init_windows() {
     my_panels[5] = new_panel(word_input);
 
     // Create borders around the windows
-    box(round_info, 0, 0);
-    box(rankings, 0, 0);
-    box(puzzle_words, 0, 0);
-    box(word_input, 0, 0);
-    box(prompt, 0, 0);
+    wborder(round_info, ls, rs, ts, bs, tl, tr, bl, br);
+    wborder(rankings, ls, rs, ts, bs, tl, tr, bl, br);
+    wborder(puzzle_words, ls, rs, ts, bs, tl, tr, bl, br);
+    wborder(word_input, ls, rs, ts, bs, tl, tr, bl, br);
+    wborder(prompt, ls, rs, ts, bs, tl, tr, bl, br);
 
     // Initialize all color pairs for the possible players
     int i;
