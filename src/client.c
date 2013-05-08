@@ -612,6 +612,7 @@ static void quit()
     int response = getch();
     if (response == 'y' || response == 'Y') {
         endwin();
+        close(client);
         exit(0);
     }
 
