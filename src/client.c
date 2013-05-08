@@ -369,7 +369,7 @@ static void update_word(char* cmd) {
     if (player_num == 0 && accept_user_input) {
         accept_user_input = false;
         werase(word_input);
-        box(word_input, 0, 0);
+        wborder(word_input, ls, rs, ts, bs, tl, tr, bl, br);
         mvwaddstr(word_input, 1, 1, "The round is now over.");
         wrefresh(word_input);
     }
