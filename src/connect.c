@@ -56,6 +56,97 @@ char *check_name(char* test_name)
     return temp_name;    
 }
 
+void dc_check()
+{
+    printf("dc check started\n");
+    fd_set read_fds;  // temp file descriptor list for select()
+    int biggest_fd = get_biggest_player_fd();   // largest file descriptor number 
+    int select_result = 0;
+    int newfd;        // newly accept()ed socket descriptor
+    int last_scorer;
+    printf("the biggest fd is: %d\n", biggest_fd);
+    struct sockaddr_storage remoteaddr; // client address
+    socklen_t addrlen;
+
+    char buf[256];    // buffer for client data
+    int nbytes;
+
+    char remoteIP[INET6_ADDRSTRLEN];
+
+	int listener = server_info.listen_fd;
+
+	for(;;) {
+        
+        read_fds = server_info.current_users; // copy it
+		select_result = select(biggest_fd+1, &read_fds, NULL, NULL, NULL);
+        if (select_result == -1) {
+            perror("select");
+            exit(4);
+        }
+		else if(select_result)
+		{
+			
+        	// run through the existing connections looking for data to read
+	        for(int i = 0; i <= biggest_fd; i++) {
+	            if (FD_ISSET(i, &read_fds)) { // we got one!!
+	                if (i == listener) {
+	                    // handle new connections
+	                    addrlen = sizeof remoteaddr;
+	                    newfd = accept(listener,
+	                        (struct sockaddr *)&remoteaddr,
+	                        &addrlen);
+						
+	                    if (newfd == -1) {
+	                        perror("accept");
+	                    } else {
+	                        printf("selectserver: new connection from %s on "
+	                            "socket %d\n", inet_ntop(remoteaddr.ss_family,
+	                                           get_in_addr((struct sockaddr*)&remoteaddr),
+	                                           remoteIP, INET6_ADDRSTRLEN),
+    	                                       newfd);
+	                        
+                            printf("connection on socket %d refused\n", newfd);
+                            //write to the port that they're too late   
+                            char *tempstr = "You were too late! The game is in progress.\nGoodbye!\n";
+                            write(newfd, tempstr, strlen(tempstr)+1);
+                            close(newfd);   
+	                        
+	                            
+	                    }
+	                } else {
+	                    int nbytes;
+	                    // handle data from a client
+	                    if ((nbytes = recv(i, buf, sizeof buf, 0)) <= 0) {
+	                        // got error or connection closed by client
+	                        if (nbytes == 0) {
+	                            // connection closed
+	                            printf("selectserver: socket %d hung up\n", i);
+	                            server_info.players[get_player_index(i)].connected = false;
+	                            server_info.num_players--;
+	                            }
+	                        else {
+	                            perror("recv");
+	                        }
+	                        close(i); // bye!
+	                        FD_CLR(i, &server_info.current_users); // remove from master set
+	                	}
+	                	//they didn't disconnect
+	                	else
+	                	{
+	                	    //who cares?
+	                	} 
+	                } // END handle data from client
+	            } // END got new incoming connection
+	        } // END looping through file descriptors
+		} // END else if for if this is a thing
+		else
+		{
+		    //the select somehow returned
+			break;
+		}
+    } // END for(;;)--and you thought it would never end!
+}
+
 //this gets passed a Server Info struct that is in the main program 
 //for general information, and passes back an fd_set for tnhe list
 //of all connected parties, hopefully to make later selects easier.

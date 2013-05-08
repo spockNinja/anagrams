@@ -35,7 +35,7 @@ int start_game()
     int biggest_fd = get_biggest_player_fd();   // largest file descriptor number 
     int select_result = 0;
     int newfd;        // newly accept()ed socket descriptor
-    int last_scorer;
+    int last_scorer = 0;
     printf("the biggest fd is: %d\n", biggest_fd);
     struct sockaddr_storage remoteaddr; // client address
     socklen_t addrlen;
@@ -46,7 +46,7 @@ int start_game()
     char remoteIP[INET6_ADDRSTRLEN];
 
 	struct timeval tv;
-	tv.tv_sec = 120;
+	tv.tv_sec = 300;
 	tv.tv_usec = 0;
 	int listener = server_info.listen_fd;
 
@@ -146,8 +146,16 @@ int start_game()
 	        } // END looping through file descriptors
 		} // END else if for if this is a thing
 		else
-		{
+		{   
 		    // the round is over
+		    pthread_t dc_thread;
+	        // start a thread to handle disconnects to avoid crashes
+		    if(pthread_create(&dc_thread, NULL, (void*) &dc_check, NULL) != 0)
+	        {
+	            perror("cannot create thread\n");
+	        }
+	        
+	        //printf("thread created\n");
 		    server_info.players[last_scorer].bonus_points += 50;
 		    message_clients(update_player_list());
             finish_puzzle();
@@ -156,11 +164,19 @@ int start_game()
 		    message_clients(update_leaderboard());
 		    tv.tv_sec = 10;
 		    timer(&time_arg);
+		    
+		    
+		    //cleanup the disconnect checking thread
+		    if(pthread_cancel(dc_thread) != 0)
+		    {
+		        perror("can't close thread\n");
+		    //printf("thread closed \n");
+		    }
 			return 0;
 		}
     } // END for(;;)--and you thought it would never end!
    
-	printf("Done looking for users (30 seconds elapsed)\n");
+	printf("The round has completed.\n");
 	
     return 0;
 }
