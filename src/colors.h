@@ -1,5 +1,5 @@
 static const int color_pairs[11][2] = {
-	{0, 15}, // white on black
+	{0, 7}, // white on black
 	{1, 3},  // yellow on red
 	{2, 4},  // dark blue on green
 	{3, 1},  // red on yellow
